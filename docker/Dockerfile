@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN echo "upload_max_filesize=20M\npost_max_size=20M" > /usr/local/etc/php/conf.d/uploads.ini
+RUN echo "upload_max_filesize=2M\npost_max_size=2M" > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www/html
 
