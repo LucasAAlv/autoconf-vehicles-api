@@ -22,6 +22,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash([
+            'password',
+            'password_confirmation',
+            'current_password',
+            'token',
+            'api_token',
+            'secret',
+        ]);
+
+        $exceptions->context(fn () => [
+            'url'    => request()->fullUrl(),
+            'method' => request()->method(),
+            'ip'     => request()->ip(),
+            'user'   => request()->user()?->id,
+        ]);
+
         $problem = function (
             Request $request,
             int $status,

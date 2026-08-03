@@ -15,9 +15,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN echo "upload_max_filesize=2M\npost_max_size=2M" > /usr/local/etc/php/conf.d/uploads.ini
 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /var/www/html
 
 EXPOSE 8000
 
-ENTRYPOINT ["php", "artisan"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["serve", "--host=0.0.0.0", "--port=8000"]
