@@ -1,7 +1,9 @@
+name: autoconf-vehicles-api
+
 services:
   app:
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
