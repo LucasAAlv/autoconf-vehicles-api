@@ -1,5 +1,7 @@
 # autoconf-vehicles-api
 
+[![CI](https://github.com/LucasAAlv/autoconf-vehicles-api/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasAAlv/autoconf-vehicles-api/actions/workflows/ci.yml)
+
 Back-end Laravel 12 de um desafio técnico SaaS multiusuário para gestão de veículos.
 
 ## Requisitos

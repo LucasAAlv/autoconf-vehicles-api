@@ -159,6 +159,19 @@ tabelas do banco configurado — sem essa guarda, um erro de configuração apon
 sintaxe mais legível (`it(...)` plano) e o plugin de arquitetura (`ArchTest`) sem esforço
 extra.
 
+## ADR-015 — CI no GitHub Actions
+
+Antecipada do backlog de bônus: com a suíte já rodando contra PostgreSQL real, o custo de
+automatizar ficou baixo, e o benefício cresce a cada PR daqui pra frente (M2 em diante), não
+só no fim do projeto.
+**Decisão:** um workflow (`.github/workflows/ci.yml`), disparado em toda pull request e em
+push para `develop`. Sobe um container de serviço `postgres:17`, instala as dependências e
+roda `pint --test` e a suíte Pest — as mesmas verificações que já rodam localmente antes de
+cada PR, só automatizadas.
+**Trade-off:** mais um lugar pra manter em sincronia com `composer.json` se os scripts de
+lint/teste mudarem de nome. Sem etapa de deploy — o ambiente de entrega é local/Docker, não
+há destino remoto para publicar.
+
 ---
 
 # Decisões em aberto
@@ -166,7 +179,6 @@ extra.
 | ID | Decisão | Situação |
 |----|---------|----------|
 | OPEN-01 | PAT como segunda credencial | Adiada para M8; só se sobrar tempo |
-| OPEN-02 | CI no GitHub Actions | Adiada; menor valor por hora entre os bônus |
 | OPEN-03 | E2E com Playwright | Adiada para W9 |
 | OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Decidir ao implementar M4 |
 | OPEN-05 | Verificação de e-mail (`email_verified_at`, `MustVerifyEmail`) | Fora de escopo do desafio; coluna removida do baseline, adicionar se sobrar tempo |
