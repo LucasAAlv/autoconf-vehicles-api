@@ -7,13 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libjpeg-dev \
         libfreetype6-dev \
         unzip \
+        git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_pgsql zip gd \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN echo "upload_max_filesize=2M\npost_max_size=2M" > /usr/local/etc/php/conf.d/uploads.ini
+RUN echo "upload_max_filesize=2M\npost_max_size=24M\nmax_file_uploads=10" > /usr/local/etc/php/conf.d/uploads.ini
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
@@ -23,4 +24,4 @@ WORKDIR /var/www/html
 EXPOSE 8000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

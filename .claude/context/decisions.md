@@ -71,10 +71,31 @@ apresentação. A topologia de produção pode ser descrita verbalmente.
 
 Toda resposta de erro é `application/problem+json` com `type`, `title`, `status`, `detail`,
 `instance`, mais o membro de extensão `errors` em validações 422. Renderizador único em
-`bootstrap/app.php`.
+`bootstrap/app.php`, com a montagem do corpo extraída para `App\Exceptions\Problem` (classe
+simples, não uma facade).
 **Trade-off:** ~60 linhas a mais que o padrão do Laravel. Em troca, contrato de erro
 padronizado em vez de vazar o formato do framework, e o interceptor do front lê um só
 formato.
+
+**Correção de status/headers HTTP:** `Handler::render()` chama `prepareException()` antes de
+rodar qualquer callback registrado, e esse método reescreve incondicionalmente
+`ModelNotFoundException` → `NotFoundHttpException` e `AuthorizationException` →
+`AccessDeniedHttpException`. Os callbacks originais para esses dois tipos nunca eram
+alcançados — toda 403/404 real caía no 500 padrão do Laravel em vez do problem+json esperado;
+o mesmo valia para 405 e 419, que não tinham callback nenhum. A correção: um callback para
+`NotFoundHttpException` (cobre rota não encontrada e model-not-found, sempre com detail
+genérico — a mensagem real do Laravel vaza a classe do model e o id) e um callback para
+`Symfony\Component\HttpKernel\Exception\HttpExceptionInterface` (cobre 403, 405 com header
+`Allow`, 419 — `TokenMismatchException` não implementa essa interface, mas
+`prepareException()` já a reescreve como `HttpException(419, ...)` antes do callback rodar —
+e 429 com header `Retry-After`, o que tornou o callback dedicado a
+`ThrottleRequestsException` redundante e ele foi removido). Cada callback devolve `null` para
+requisições que não pedem JSON, para que a navegação comum em rota web continue recebendo
+HTML do Laravel.
+
+**Mudança de contrato:** o `title` do 401 passa de `Unauthenticated` (string fixa) para
+`Unauthorized` (frase-motivo real do status 401, vinda de `Response::$statusTexts`). O
+`detail` continua `Unauthenticated.` — mensagem própria do Laravel, inalterada.
 
 ## ADR-008 — Filtros e ordenação escritos à mão com allow-list
 
@@ -110,6 +131,34 @@ inglês; READMEs e este documento em português. Os campos do domínio permanece
 português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`, `km`,
 `cambio`, `combustivel`) — são parte do contrato definido no desafio.
 
+## ADR-014 — Harness de testes: Pest, `phpunit.xml` como fonte única de verdade
+
+Pest 4 substitui os testes em PHPUnit puro do skeleton, mantendo `phpunit/phpunit` como
+motor de execução por baixo (é o próprio Laravel 12 que faz essa escolha). Duas suítes,
+com comportamento deliberadamente diferente:
+
+- `Feature` estende `Tests\TestCase` (boot completo da aplicação) e usa `RefreshDatabase`
+  (migra o banco a cada teste). Roda contra `autoconf_vehicles_test`, um segundo banco no
+  mesmo servidor PostgreSQL do ambiente de desenvolvimento — não um container adicional.
+- `Unit` estende `Tests\TestCase` também, mas sem `RefreshDatabase` — nenhuma conexão de
+  banco é preparada. Um teste `Unit` que precisar do banco pertence a `Feature`.
+
+`phpunit.xml` é a única fonte de configuração do ambiente de teste (sem `.env.testing`):
+o carregamento de arquivos de ambiente do Laravel, quando `APP_ENV=testing`, substitui o
+`.env` inteiro em vez de sobrepor chaves, então um `.env.testing` incompleto apagaria
+`APP_KEY` e quebraria a suíte de forma difícil de diagnosticar. `DB_HOST`/`DB_PORT`/
+`DB_USERNAME`/`DB_PASSWORD` são as únicas variáveis não forçadas ali, para vir do ambiente
+onde o comando roda (host ou container) — o mesmo `phpunit.xml` funciona nos dois lugares.
+
+`tests/TestCase.php` recusa rodar a suíte contra qualquer banco cujo nome não termine em
+`_test` (ou `_test_N` para o modo `--parallel`), porque `RefreshDatabase` derruba todas as
+tabelas do banco configurado — sem essa guarda, um erro de configuração apontaria
+`migrate:fresh` para o banco de desenvolvimento.
+
+**Trade-off:** mais uma dependência de teste (`pestphp/pest-plugin-laravel`); em troca,
+sintaxe mais legível (`it(...)` plano) e o plugin de arquitetura (`ArchTest`) sem esforço
+extra.
+
 ---
 
 # Decisões em aberto
@@ -120,6 +169,7 @@ português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`
 | OPEN-02 | CI no GitHub Actions | Adiada; menor valor por hora entre os bônus |
 | OPEN-03 | E2E com Playwright | Adiada para W9 |
 | OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Decidir ao implementar M4 |
+| OPEN-05 | Verificação de e-mail (`email_verified_at`, `MustVerifyEmail`) | Fora de escopo do desafio; coluna removida do baseline, adicionar se sobrar tempo |
 
 ---
 
@@ -129,3 +179,8 @@ português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`
 - Sem fila para processamento de imagens: o upload é síncrono.
 - Sem redimensionamento nem geração de thumbnails.
 - Rate limiting em memória; em produção exigiria Redis.
+- Migrações do baseline (`0001_01_01_*`) trazem só `users` e `sessions` — `cache`/`cache_locks`,
+  `jobs`/`job_batches`/`failed_jobs` e `password_reset_tokens` do skeleton padrão do Laravel foram
+  removidas: `QUEUE_CONNECTION=sync` e `CACHE_STORE=file` tornam as duas primeiras sem uso, e não há
+  fluxo de recuperação de senha no escopo do desafio. `sessions` permanece porque é o armazenamento
+  real da sessão do ADR-002 (`SESSION_DRIVER=database`).
