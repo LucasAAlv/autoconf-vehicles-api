@@ -7,7 +7,7 @@ Back-end Laravel 12 de um desafio técnico SaaS multiusuário para gestão de ve
 
 ## Stack
 
-- PHP 8.2+, Laravel 12, PSR-12 (`pint.json`)
+- PHP 8.4+, Laravel 12, PSR-12 (`pint.json`)
 - **Auth:** Sanctum SPA — cookies `HttpOnly`, CSRF via `XSRF-TOKEN` / `X-XSRF-TOKEN` (ADR-002)
 - **Banco:** PostgreSQL 17 — obrigatório por causa do índice único parcial da capa (ADR-003)
 - **Testes:** Pest contra PostgreSQL — SQLite daria falso positivo na invariante de capa (ADR-012)

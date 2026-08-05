@@ -6,7 +6,7 @@ Back-end Laravel 12 de um desafio técnico SaaS multiusuário para gestão de ve
 
 ## Requisitos
 
-- PHP 8.3+
+- PHP 8.4+
 - Composer
 - PostgreSQL 17
 - Docker (opcional, recomendado)
@@ -100,7 +100,7 @@ Outros scripts úteis: `composer test:unit`, `composer test:feature`, `composer 
 
 ## Stack
 
-- PHP 8.3+, Laravel 12
+- PHP 8.4+, Laravel 12
 - Autenticação: Sanctum (cookies HttpOnly)
 - Banco: PostgreSQL 17
 - Respostas de erro: RFC 7807 (`application/problem+json`)
