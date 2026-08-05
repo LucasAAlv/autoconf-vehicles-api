@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\Problem;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -38,59 +39,31 @@ return Application::configure(basePath: dirname(__DIR__))
             'user'   => request()->user()?->id,
         ]);
 
-        $problem = function (
-            Request $request,
-            int $status,
-            string $title,
-            ?string $detail = null,
-            array $extra = [],
-        ): JsonResponse {
-            $body = [
-                'type'   => 'about:blank',
-                'title'  => $title,
-                'status' => $status,
-            ];
-
-            if ($detail !== null) {
-                $body['detail'] = $detail;
-            }
-
-            $body['instance'] = $request->getRequestUri();
-
-            foreach ($extra as $key => $value) {
-                $body[$key] = $value;
-            }
-
-            return response()->json($body, $status, [
-                'Content-Type' => 'application/problem+json',
-            ]);
-        };
-
-        $exceptions->render(function (AuthenticationException $e, Request $request) use ($problem): JsonResponse {
-            return $problem($request, 401, 'Unauthenticated', $e->getMessage());
+        $exceptions->render(function (AuthenticationException $e, Request $request): JsonResponse {
+            return Problem::response($request, 401, $e->getMessage());
         });
 
-        $exceptions->render(function (AuthorizationException $e, Request $request) use ($problem): JsonResponse {
-            return $problem($request, 403, 'Forbidden', $e->getMessage());
+        $exceptions->render(function (AuthorizationException $e, Request $request): JsonResponse {
+            return Problem::response($request, 403, $e->getMessage());
         });
 
-        $exceptions->render(function (ModelNotFoundException $e, Request $request) use ($problem): JsonResponse {
-            return $problem($request, 404, 'Not Found', 'The requested resource was not found.');
+        $exceptions->render(function (ModelNotFoundException $e, Request $request): JsonResponse {
+            return Problem::response($request, 404, 'The requested resource was not found.');
         });
 
-        $exceptions->render(function (ValidationException $e, Request $request) use ($problem): JsonResponse {
-            return $problem($request, 422, 'Unprocessable Entity', $e->getMessage(), [
+        $exceptions->render(function (ValidationException $e, Request $request): JsonResponse {
+            return Problem::response($request, 422, $e->getMessage(), [
                 'errors' => $e->errors(),
             ]);
         });
 
-        $exceptions->render(function (ThrottleRequestsException $e, Request $request) use ($problem): JsonResponse {
-            return $problem($request, 429, 'Too Many Requests', $e->getMessage());
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request): JsonResponse {
+            return Problem::response($request, 429, $e->getMessage());
         });
 
-        $exceptions->render(function (\Throwable $e, Request $request) use ($problem): JsonResponse {
+        $exceptions->render(function (\Throwable $e, Request $request): JsonResponse {
             $detail = app()->environment('local') ? $e->getMessage() : null;
 
-            return $problem($request, 500, 'Internal Server Error', $detail);
+            return Problem::response($request, 500, $detail);
         });
     })->create();
