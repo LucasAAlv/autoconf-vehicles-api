@@ -120,6 +120,7 @@ português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`
 | OPEN-02 | CI no GitHub Actions | Adiada; menor valor por hora entre os bônus |
 | OPEN-03 | E2E com Playwright | Adiada para W9 |
 | OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Decidir ao implementar M4 |
+| OPEN-05 | Verificação de e-mail (`email_verified_at`, `MustVerifyEmail`) | Fora de escopo do desafio; coluna removida do baseline, adicionar se sobrar tempo |
 
 ---
 
@@ -129,3 +130,8 @@ português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`
 - Sem fila para processamento de imagens: o upload é síncrono.
 - Sem redimensionamento nem geração de thumbnails.
 - Rate limiting em memória; em produção exigiria Redis.
+- Migrações do baseline (`0001_01_01_*`) trazem só `users` e `sessions` — `cache`/`cache_locks`,
+  `jobs`/`job_batches`/`failed_jobs` e `password_reset_tokens` do skeleton padrão do Laravel foram
+  removidas: `QUEUE_CONNECTION=sync` e `CACHE_STORE=file` tornam as duas primeiras sem uso, e não há
+  fluxo de recuperação de senha no escopo do desafio. `sessions` permanece porque é o armazenamento
+  real da sessão do ADR-002 (`SESSION_DRIVER=database`).
