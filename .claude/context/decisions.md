@@ -110,6 +110,34 @@ inglês; READMEs e este documento em português. Os campos do domínio permanece
 português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`, `km`,
 `cambio`, `combustivel`) — são parte do contrato definido no desafio.
 
+## ADR-014 — Harness de testes: Pest, `phpunit.xml` como fonte única de verdade
+
+Pest 4 substitui os testes em PHPUnit puro do skeleton, mantendo `phpunit/phpunit` como
+motor de execução por baixo (é o próprio Laravel 12 que faz essa escolha). Duas suítes,
+com comportamento deliberadamente diferente:
+
+- `Feature` estende `Tests\TestCase` (boot completo da aplicação) e usa `RefreshDatabase`
+  (migra o banco a cada teste). Roda contra `autoconf_vehicles_test`, um segundo banco no
+  mesmo servidor PostgreSQL do ambiente de desenvolvimento — não um container adicional.
+- `Unit` estende `Tests\TestCase` também, mas sem `RefreshDatabase` — nenhuma conexão de
+  banco é preparada. Um teste `Unit` que precisar do banco pertence a `Feature`.
+
+`phpunit.xml` é a única fonte de configuração do ambiente de teste (sem `.env.testing`):
+o carregamento de arquivos de ambiente do Laravel, quando `APP_ENV=testing`, substitui o
+`.env` inteiro em vez de sobrepor chaves, então um `.env.testing` incompleto apagaria
+`APP_KEY` e quebraria a suíte de forma difícil de diagnosticar. `DB_HOST`/`DB_PORT`/
+`DB_USERNAME`/`DB_PASSWORD` são as únicas variáveis não forçadas ali, para vir do ambiente
+onde o comando roda (host ou container) — o mesmo `phpunit.xml` funciona nos dois lugares.
+
+`tests/TestCase.php` recusa rodar a suíte contra qualquer banco cujo nome não termine em
+`_test` (ou `_test_N` para o modo `--parallel`), porque `RefreshDatabase` derruba todas as
+tabelas do banco configurado — sem essa guarda, um erro de configuração apontaria
+`migrate:fresh` para o banco de desenvolvimento.
+
+**Trade-off:** mais uma dependência de teste (`pestphp/pest-plugin-laravel`); em troca,
+sintaxe mais legível (`it(...)` plano) e o plugin de arquitetura (`ArchTest`) sem esforço
+extra.
+
 ---
 
 # Decisões em aberto
