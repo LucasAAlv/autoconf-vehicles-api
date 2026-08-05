@@ -120,6 +120,7 @@ português (`placa`, `chassi`, `marca`, `modelo`, `versao`, `valor_venda`, `cor`
 | OPEN-02 | CI no GitHub Actions | Adiada; menor valor por hora entre os bônus |
 | OPEN-03 | E2E com Playwright | Adiada para W9 |
 | OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Decidir ao implementar M4 |
+| OPEN-05 | Verificação de e-mail (`email_verified_at`, `MustVerifyEmail`) | Fora de escopo do desafio; coluna removida do baseline, adicionar se sobrar tempo |
 
 ---
 
