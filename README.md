@@ -56,8 +56,13 @@ A API ficará disponível em `http://localhost:8000`.
 ## Docker
 
 ```bash
-docker compose -f docker/docker-compose.yml up --build
+docker compose --env-file .env -f docker/docker-compose.yml up --build
 ```
+
+Isso sobe a aplicação (`app`) e o PostgreSQL (`db`). O `app` monta a raiz do
+repositório em `/var/www/html` e lê o `APP_KEY` e demais variáveis do `.env`
+da raiz — garanta que ele exista (`cp .env.example .env && php artisan key:generate`)
+antes de subir o stack.
 
 ## Testes
 
