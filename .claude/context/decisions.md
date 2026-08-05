@@ -71,10 +71,31 @@ apresentação. A topologia de produção pode ser descrita verbalmente.
 
 Toda resposta de erro é `application/problem+json` com `type`, `title`, `status`, `detail`,
 `instance`, mais o membro de extensão `errors` em validações 422. Renderizador único em
-`bootstrap/app.php`.
+`bootstrap/app.php`, com a montagem do corpo extraída para `App\Exceptions\Problem` (classe
+simples, não uma facade).
 **Trade-off:** ~60 linhas a mais que o padrão do Laravel. Em troca, contrato de erro
 padronizado em vez de vazar o formato do framework, e o interceptor do front lê um só
 formato.
+
+**Correção de status/headers HTTP:** `Handler::render()` chama `prepareException()` antes de
+rodar qualquer callback registrado, e esse método reescreve incondicionalmente
+`ModelNotFoundException` → `NotFoundHttpException` e `AuthorizationException` →
+`AccessDeniedHttpException`. Os callbacks originais para esses dois tipos nunca eram
+alcançados — toda 403/404 real caía no 500 padrão do Laravel em vez do problem+json esperado;
+o mesmo valia para 405 e 419, que não tinham callback nenhum. A correção: um callback para
+`NotFoundHttpException` (cobre rota não encontrada e model-not-found, sempre com detail
+genérico — a mensagem real do Laravel vaza a classe do model e o id) e um callback para
+`Symfony\Component\HttpKernel\Exception\HttpExceptionInterface` (cobre 403, 405 com header
+`Allow`, 419 — `TokenMismatchException` não implementa essa interface, mas
+`prepareException()` já a reescreve como `HttpException(419, ...)` antes do callback rodar —
+e 429 com header `Retry-After`, o que tornou o callback dedicado a
+`ThrottleRequestsException` redundante e ele foi removido). Cada callback devolve `null` para
+requisições que não pedem JSON, para que a navegação comum em rota web continue recebendo
+HTML do Laravel.
+
+**Mudança de contrato:** o `title` do 401 passa de `Unauthenticated` (string fixa) para
+`Unauthorized` (frase-motivo real do status 401, vinda de `Response::$statusTexts`). O
+`detail` continua `Unauthenticated.` — mensagem própria do Laravel, inalterada.
 
 ## ADR-008 — Filtros e ordenação escritos à mão com allow-list
 
