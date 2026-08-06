@@ -6,6 +6,8 @@ use App\Http\Requests\Vehicle\StoreVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class VehicleController extends Controller
 {
@@ -50,5 +52,24 @@ class VehicleController extends Controller
         $vehicle->load(['creator', 'updater']);
 
         return new VehicleResource($vehicle);
+    }
+
+    /**
+     * Delete a vehicle.
+     *
+     * Wrapped in a transaction even though today it is a single-row
+     * delete: `VehicleImage` (M4) will add image-row and physical-file
+     * removal inside the same transaction later, without needing to
+     * restructure this method.
+     */
+    public function destroy(Vehicle $vehicle): Response
+    {
+        $this->authorize('delete', $vehicle);
+
+        DB::transaction(function () use ($vehicle) {
+            $vehicle->delete();
+        });
+
+        return response()->noContent();
     }
 }
