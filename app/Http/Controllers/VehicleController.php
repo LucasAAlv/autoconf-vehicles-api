@@ -6,12 +6,17 @@ use App\Http\Requests\Vehicle\StoreVehicleRequest;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
+use App\Services\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class VehicleController extends Controller
 {
+    public function __construct(private readonly VehicleImageService $vehicleImageService)
+    {
+    }
+
     /**
      * Create a new vehicle owned by the authenticated user.
      *
@@ -80,16 +85,21 @@ class VehicleController extends Controller
     /**
      * Delete a vehicle.
      *
-     * Wrapped in a transaction even though today it is a single-row
-     * delete: `VehicleImage` (M4) will add image-row and physical-file
-     * removal inside the same transaction later, without needing to
-     * restructure this method.
+     * `vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw
+     * PostgreSQL level, so `VehicleImage` rows disappear automatically along
+     * with the vehicle — but that cascade never fires an Eloquent event, so
+     * `VehicleImageService::deleteAllForVehicle()` is called, inside the same
+     * transaction, to also clean up the physical files from the public disk
+     * (deferred to after the commit, so a rollback never leaves the vehicle
+     * gone but its images' files still on disk, or vice versa).
      */
     public function destroy(Vehicle $vehicle): Response
     {
         $this->authorize('delete', $vehicle);
 
         DB::transaction(function () use ($vehicle) {
+            $this->vehicleImageService->deleteAllForVehicle($vehicle);
+
             $vehicle->delete();
         });
 
