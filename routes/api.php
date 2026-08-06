@@ -28,4 +28,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/vehicles/{vehicle}/images', [VehicleImageController::class, 'store']);
     Route::patch('/vehicles/{vehicle}/images/{imageId}/cover', [VehicleImageController::class, 'setCover']);
+    Route::delete('/vehicles/{vehicle}/images/{imageId}', [VehicleImageController::class, 'destroy']);
 });
