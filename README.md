@@ -1,59 +1,106 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# autoconf-vehicles-api
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![CI](https://github.com/LucasAAlv/autoconf-vehicles-api/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasAAlv/autoconf-vehicles-api/actions/workflows/ci.yml)
 
-## About Laravel
+Back-end Laravel 12 de um desafio técnico SaaS multiusuário para gestão de veículos.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requisitos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.5+
+- Composer
+- PostgreSQL 17
+- Docker (opcional, recomendado)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Configuração
 
-## Learning Laravel
+### 1. Instalar dependências
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Variáveis de ambiente
 
-## Laravel Sponsors
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Edite o `.env` com as credenciais do banco de dados PostgreSQL.
 
-### Premium Partners
+### 3. Banco de dados
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan migrate
+```
 
-## Contributing
+### 4. Link de storage público (passo obrigatório)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+O upload de imagens usa o disco `public` do Laravel. Para que os arquivos enviados
+fiquem acessíveis em `/storage/...`, é necessário criar o symlink de `public/storage`
+apontando para `storage/app/public`:
 
-## Code of Conduct
+```bash
+php artisan storage:link
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+> Ao rodar via Docker, o `docker/entrypoint.sh` executa `storage:link --force`
+> automaticamente antes de subir o servidor.
 
-## Security Vulnerabilities
+### 5. Iniciar o servidor de desenvolvimento
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan serve
+```
 
-## License
+A API ficará disponível em `http://localhost:8000`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Docker
+
+```bash
+docker compose --env-file .env -f docker/docker-compose.yml up --build
+```
+
+Isso sobe a aplicação (`app`) e o PostgreSQL (`db`). O `app` monta a raiz do
+repositório em `/var/www/html` e lê o `APP_KEY` e demais variáveis do `.env`
+da raiz — garanta que ele exista (`cp .env.example .env && php artisan key:generate`)
+antes de subir o stack.
+
+## Testes
+
+```bash
+composer test
+# ou, direto:
+vendor/bin/pest
+```
+
+Os testes rodam contra PostgreSQL real, em um segundo banco (`autoconf_vehicles_test`) —
+SQLite não é suportado porque o índice único parcial da invariante de capa de imagem não
+existe nesse driver, e testar essa invariante em SQLite daria falso positivo. Toda a
+configuração do ambiente de teste vive em `phpunit.xml` (não há `.env.testing`); veja
+`.claude/context/testing.md` para o porquê e para as convenções da suíte.
+
+`autoconf_vehicles_test` precisa existir no mesmo servidor Postgres usado em
+desenvolvimento, antes de rodar a suíte:
+
+- **Volume novo** (primeira vez subindo o stack Docker): nada a fazer — o `db` já monta
+  `docker/initdb` em `/docker-entrypoint-initdb.d`, e o Postgres roda o script
+  `10-create-test-database.sh` de lá automaticamente na primeira inicialização de um data
+  directory vazio.
+- **Volume já existente** (banco já rodando, o caso comum no dia a dia):
+  `/docker-entrypoint-initdb.d` não roda de novo contra um volume com dados. Crie o banco
+  manualmente uma vez:
+
+  ```bash
+  docker exec autoconf-vehicles-api-db-1 psql -U postgres -c 'CREATE DATABASE autoconf_vehicles_test OWNER postgres'
+  ```
+
+Outros scripts úteis: `composer test:unit`, `composer test:feature`, `composer lint`
+(Pint, corrige) e `composer lint:test` (Pint, só verifica).
+
+## Stack
+
+- PHP 8.5+, Laravel 12
+- Autenticação: Sanctum (cookies HttpOnly)
+- Banco: PostgreSQL 17
+- Respostas de erro: RFC 7807 (`application/problem+json`)
