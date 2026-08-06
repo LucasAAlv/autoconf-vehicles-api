@@ -8,6 +8,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Services\VehicleImageService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class VehicleImageController extends Controller
 {
@@ -59,5 +60,26 @@ class VehicleImageController extends Controller
         $image = $this->vehicleImageService->setCover($vehicle, $image);
 
         return new VehicleImageResource($image);
+    }
+
+    /**
+     * Delete a single image belonging to a vehicle.
+     *
+     * The image is looked up through `$vehicle->images()` rather than a
+     * global `VehicleImage::findOrFail()` (or implicit route-model binding
+     * on `{imageId}`): this guarantees an image belonging to a different
+     * vehicle 404s exactly like one that doesn't exist at all, instead of
+     * leaking a 403 (or succeeding) for an id that is real but not "this
+     * vehicle's".
+     */
+    public function destroy(Vehicle $vehicle, string $imageId): Response
+    {
+        $this->authorize('manageImages', $vehicle);
+
+        $image = $vehicle->images()->findOrFail($imageId);
+
+        $this->vehicleImageService->destroy($image);
+
+        return response()->noContent();
     }
 }

@@ -7,6 +7,7 @@ use App\Models\VehicleImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class VehicleImageService
 {
@@ -78,5 +79,32 @@ class VehicleImageService
         });
 
         return $image;
+    }
+
+    /**
+     * Delete a single `VehicleImage`: remove its DB row and, once the
+     * transaction actually commits, its physical file from the public disk.
+     *
+     * Settled product decision: deleting the cover image leaves the vehicle
+     * with zero cover images. No remaining image is ever auto-promoted to
+     * cover — every other image simply stays (or already is) `is_cover =
+     * false`, and picking a new cover is a separate, deliberate call to the
+     * "set cover" endpoint.
+     *
+     * The physical file is removed via `DB::afterCommit()` rather than
+     * right after `$image->delete()`, mirroring the transaction technique
+     * `VehicleController::destroy()` already uses: if anything makes the
+     * transaction roll back, the file must still exist on disk, so deleting
+     * it is deferred until the commit is guaranteed to have happened.
+     */
+    public function destroy(VehicleImage $image): void
+    {
+        DB::transaction(function () use ($image) {
+            $path = $image->path;
+
+            $image->delete();
+
+            DB::afterCommit(fn () => Storage::disk('public')->delete($path));
+        });
     }
 }
