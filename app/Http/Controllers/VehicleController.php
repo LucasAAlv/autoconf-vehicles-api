@@ -29,9 +29,10 @@ class VehicleController extends Controller
         $vehicle->save();
 
         // Loaded (rather than left unset) so the response shape matches
-        // `show()` exactly: both always carry the audit relations, never
-        // just when they happen to already be in memory.
-        $vehicle->load(['creator', 'updater']);
+        // `show()` exactly: both always carry the audit relations and the
+        // `images` collection (empty right after creation), never just
+        // when they happen to already be in memory.
+        $vehicle->load(['creator', 'updater', 'images']);
 
         return (new VehicleResource($vehicle))
             ->response()
@@ -50,7 +51,7 @@ class VehicleController extends Controller
     {
         $this->authorize('view', $vehicle);
 
-        $vehicle->load(['creator', 'updater']);
+        $vehicle->load(['creator', 'updater', 'images']);
 
         return new VehicleResource($vehicle);
     }
@@ -71,7 +72,7 @@ class VehicleController extends Controller
         $vehicle->fill($request->validated());
         $vehicle->save();
 
-        $vehicle->load(['creator', 'updater']);
+        $vehicle->load(['creator', 'updater', 'images']);
 
         return new VehicleResource($vehicle);
     }
