@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Vehicle\StoreVehicleRequest;
+use App\Http\Requests\Vehicle\UpdateVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
@@ -48,6 +49,27 @@ class VehicleController extends Controller
     public function show(Vehicle $vehicle): VehicleResource
     {
         $this->authorize('view', $vehicle);
+
+        $vehicle->load(['creator', 'updater']);
+
+        return new VehicleResource($vehicle);
+    }
+
+    /**
+     * Update a vehicle. Both `PUT` and `PATCH` route here and behave
+     * identically: every field in `UpdateVehicleRequest` is `sometimes`, so
+     * an absent field is simply left untouched by `fill()` rather than
+     * nulled out — there is no "PUT replaces everything" distinction.
+     *
+     * `updated_by` is not set here — `VehicleObserver` stamps it from the
+     * authenticated user on the `updating` event.
+     */
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
+    {
+        $this->authorize('update', $vehicle);
+
+        $vehicle->fill($request->validated());
+        $vehicle->save();
 
         $vehicle->load(['creator', 'updater']);
 
