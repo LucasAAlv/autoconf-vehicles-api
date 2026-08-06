@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Requests\Vehicle;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class IndexVehicleRequest extends FormRequest
+{
+    /**
+     * Always authorizes: owner/admin authorization has no bearing on
+     * listing (`VehiclePolicy::viewAny` already allows any authenticated
+     * user), so this request is validation-only, matching
+     * Store/UpdateVehicleRequest.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * `page`/`per_page` are both optional — the controller falls back to a
+     * default and caps `per_page` on its own — but when present they must be
+     * positive integers.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'page'     => ['sometimes', 'integer', 'min:1'],
+            'per_page' => ['sometimes', 'integer', 'min:1'],
+        ];
+    }
+}
