@@ -40,4 +40,16 @@ class VehiclePolicy
     {
         return $user->id === $vehicle->user_id || $user->is_admin;
     }
+
+    /**
+     * Only the vehicle's owner or an admin may manage its images (upload,
+     * change the cover, delete). Kept as its own ability rather than
+     * reusing `update` so the images endpoints — this one and the
+     * cover/delete ones that follow it — don't overload the semantics of
+     * "update the vehicle itself".
+     */
+    public function manageImages(User $user, Vehicle $vehicle): bool
+    {
+        return $user->id === $vehicle->user_id || $user->is_admin;
+    }
 }
