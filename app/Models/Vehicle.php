@@ -8,6 +8,7 @@ use App\Observers\VehicleObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ObservedBy(VehicleObserver::class)]
 class Vehicle extends Model
@@ -81,5 +82,15 @@ class Vehicle extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * The images belonging to this vehicle.
+     *
+     * @return HasMany<VehicleImage, $this>
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(VehicleImage::class);
     }
 }
