@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -53,5 +55,38 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return response()->json(Auth::user());
+    }
+
+    /**
+     * Return the currently authenticated user.
+     *
+     * This route sits behind `auth:sanctum`, so a guest never reaches this
+     * method at all: Sanctum's own guard throws `AuthenticationException`
+     * first, which the app's exception renderer already turns into a
+     * problem+json 401 (wired in `bootstrap/app.php`).
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json($request->user());
+    }
+
+    /**
+     * End the SPA's authenticated session.
+     *
+     * The three steps mirror `login()`'s own care around sessions, in
+     * reverse: log the guard out, destroy the session data, and rotate the
+     * CSRF token, so neither the session id nor the CSRF token an attacker
+     * observed before logout stays valid afterwards. `204 No Content` is
+     * used rather than `200` because there is no representation to return
+     * for a logout.
+     */
+    public function logout(Request $request): Response
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->noContent();
     }
 }
