@@ -53,4 +53,30 @@ class VehicleImageService
             return $images;
         });
     }
+
+    /**
+     * Make the given image the vehicle's cover.
+     *
+     * The swap is wrapped in a transaction and always clears the current
+     * cover (if any) before setting the new one, in that order. Doing it
+     * in the opposite order — or outside a transaction — would momentarily
+     * (or, on a race, permanently) leave two rows with `is_cover = true`
+     * for the same vehicle, which the partial unique index on
+     * `vehicle_images` forbids. When `$image` is already the cover, the
+     * "clear" step affects zero rows and the "set" step is a no-op save,
+     * so this is safe to call unconditionally without a special case.
+     */
+    public function setCover(Vehicle $vehicle, VehicleImage $image): VehicleImage
+    {
+        DB::transaction(function () use ($vehicle, $image) {
+            $vehicle->images()
+                ->where('is_cover', true)
+                ->where('id', '!=', $image->id)
+                ->update(['is_cover' => false]);
+
+            $image->update(['is_cover' => true]);
+        });
+
+        return $image;
+    }
 }

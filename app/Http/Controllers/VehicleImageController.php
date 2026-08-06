@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\VehicleImage\StoreVehicleImageRequest;
 use App\Http\Resources\VehicleImageResource;
 use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use App\Services\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 
@@ -30,5 +31,33 @@ class VehicleImageController extends Controller
         return VehicleImageResource::collection($images)
             ->response()
             ->setStatusCode(201);
+    }
+
+    /**
+     * Set the cover of a vehicle to one of its own images.
+     *
+     * `{imageId}` is resolved manually (`vehicle_id`-scoped query +
+     * `findOrFail`) instead of via implicit nested route-model binding:
+     * nested binding would need `{vehicle}` and `{image}` to be related
+     * through a named Eloquent relationship matching the route segment,
+     * whereas here the check that the image actually belongs to this
+     * vehicle *is* the interesting behaviour (an image from a different
+     * vehicle must 404, not 403), so it is spelled out explicitly.
+     * `findOrFail` throws a `ModelNotFoundException`, which the exception
+     * handler in `bootstrap/app.php` already rewrites into a 404
+     * `application/problem+json` response — nothing extra to do here for
+     * either "wrong vehicle" or "no such image".
+     */
+    public function setCover(Vehicle $vehicle, int $imageId): VehicleImageResource
+    {
+        $this->authorize('manageImages', $vehicle);
+
+        $image = VehicleImage::query()
+            ->where('vehicle_id', $vehicle->id)
+            ->findOrFail($imageId);
+
+        $image = $this->vehicleImageService->setCover($vehicle, $image);
+
+        return new VehicleImageResource($image);
     }
 }
