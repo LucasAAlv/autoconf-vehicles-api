@@ -107,4 +107,29 @@ class VehicleImageService
             DB::afterCommit(fn () => Storage::disk('public')->delete($path));
         });
     }
+
+    /**
+     * Delete every physical file belonging to a vehicle's images, meant to be
+     * called as part of vehicle deletion.
+     *
+     * `vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw
+     * PostgreSQL level, so the rows themselves disappear automatically when
+     * the vehicle row is deleted — but that is a database-level cascade, not
+     * an Eloquent event, so no `VehicleImage` model event fires and nothing
+     * would otherwise remove their physical files from disk.
+     *
+     * Paths are collected before the caller deletes the vehicle, and the
+     * actual disk deletion is deferred to `DB::afterCommit()`, mirroring
+     * `destroy()` above: if the surrounding transaction rolls back, the
+     * files must still exist, so removing them is deferred until the commit
+     * is guaranteed to have happened.
+     */
+    public function deleteAllForVehicle(Vehicle $vehicle): void
+    {
+        $paths = $vehicle->images()->pluck('path');
+
+        DB::afterCommit(function () use ($paths) {
+            Storage::disk('public')->delete($paths->all());
+        });
+    }
 }
