@@ -4,6 +4,7 @@ use App\Enums\Cambio;
 use App\Enums\Combustivel;
 use App\Models\User;
 use App\Models\Vehicle;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -40,7 +41,7 @@ it('adds created_by and updated_by as nullable foreign key columns to vehicles',
         ->and($columns->get('updated_by')->is_nullable)->toBe('YES');
 });
 
-it('nullifies created_by and updated_by when the referenced user is deleted', function () {
+it('blocks deleting a user still referenced as created_by or updated_by', function () {
     $owner = User::factory()->create();
     $editor = User::factory()->create();
 
@@ -51,13 +52,16 @@ it('nullifies created_by and updated_by when the referenced user is deleted', fu
     $vehicle->updated_by = $editor->id;
     $vehicle->saveQuietly();
 
-    $editor->delete();
+    // Wrapped in its own transaction (a savepoint, since RefreshDatabase
+    // already has one open for the test): Postgres aborts the enclosing
+    // transaction after a failed statement, so without a savepoint the
+    // assertions below would fail with "current transaction is aborted"
+    // instead of actually checking anything.
+    expect(fn () => DB::transaction(fn () => $editor->delete()))->toThrow(QueryException::class);
 
-    $vehicle->refresh();
-
-    expect($vehicle->created_by)->toBeNull()
-        ->and($vehicle->updated_by)->toBeNull()
-        ->and(Vehicle::query()->whereKey($vehicle->id)->exists())->toBeTrue();
+    expect(User::query()->whereKey($editor->id)->exists())->toBeTrue()
+        ->and($vehicle->fresh()->created_by)->toBe($editor->id)
+        ->and($vehicle->fresh()->updated_by)->toBe($editor->id);
 });
 
 it('does not mass assign created_by and updated_by', function () {

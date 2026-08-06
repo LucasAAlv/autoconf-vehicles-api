@@ -35,7 +35,7 @@ it('creates created_by and updated_by as nullable columns', function () {
     }
 });
 
-it('has foreign keys from created_by and updated_by to users that set null on delete', function () {
+it('has foreign keys from created_by and updated_by to users that restrict deletion', function () {
     $foreignKeys = collect(Schema::getForeignKeys('vehicles'));
 
     foreach (['created_by', 'updated_by'] as $column) {
@@ -43,7 +43,7 @@ it('has foreign keys from created_by and updated_by to users that set null on de
 
         expect($foreignKey)->not->toBeNull()
             ->and($foreignKey['foreign_table'])->toBe('users')
-            ->and($foreignKey['on_delete'])->toBe('set null');
+            ->and($foreignKey['on_delete'])->toBe('restrict');
     }
 });
 
