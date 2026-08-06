@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Vehicle;
 
+use App\Models\Vehicle;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class IndexVehicleRequest extends FormRequest
@@ -27,6 +29,14 @@ class IndexVehicleRequest extends FormRequest
      * against the query, this request only checks they are strings when
      * present.
      *
+     * `sort` (issue #31) is a comma-separated list of fields, each optionally
+     * prefixed with `-` for descending order (e.g. `km,-valor_venda`). The
+     * inline closure rule strips that prefix off each token and rejects the
+     * whole request with a 422 the moment any one of them isn't a key of
+     * `Vehicle::SORTABLE_COLUMNS` — the same allow-list `Vehicle::scopeSort()`
+     * uses to build the query — so a client never gets a silently-ignored
+     * unknown sort field, and the query never sees an unlisted one either.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -38,6 +48,27 @@ class IndexVehicleRequest extends FormRequest
             'marca'    => ['sometimes', 'string'],
             'modelo'   => ['sometimes', 'string'],
             'placa'    => ['sometimes', 'string'],
+            'sort'     => ['sometimes', 'string', $this->sortRule()],
         ];
+    }
+
+    /**
+     * Closure rule backing the `sort` field: splits the comma-separated
+     * value and fails validation as soon as one token's field name (after
+     * stripping a leading `-`) isn't a key of `Vehicle::SORTABLE_COLUMNS`.
+     */
+    private function sortRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            foreach (explode(',', (string) $value) as $token) {
+                $field = str_starts_with($token, '-') ? substr($token, 1) : $token;
+
+                if ($field === '' || ! array_key_exists($field, Vehicle::SORTABLE_COLUMNS)) {
+                    $fail("The {$attribute} field contains an unsupported sort field: \"{$token}\".");
+
+                    return;
+                }
+            }
+        };
     }
 }

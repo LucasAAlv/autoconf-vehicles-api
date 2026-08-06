@@ -42,7 +42,10 @@ class VehicleController extends Controller
      * and paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to
      * `Vehicle::scopeFilter()` (issue #30) so this method stays a thin
      * pass-through of the validated input; sorting (issue #31) extends this
-     * same query rather than replacing it.
+     * same query rather than replacing it, via `Vehicle::scopeSort()`, and is
+     * chained *before* the trailing `orderBy('id')` so the requested fields
+     * take precedence and `id` only breaks ties among rows equal on all of
+     * them.
      *
      * `per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a
      * client asking for an unbounded page size just gets the cap back.
@@ -62,6 +65,7 @@ class VehicleController extends Controller
 
         $vehicles = Vehicle::query()
             ->filter($request->validated())
+            ->sort($request->validated('sort'))
             ->orderBy('id')
             ->paginate($perPage);
 
