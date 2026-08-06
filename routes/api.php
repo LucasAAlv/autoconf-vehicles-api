@@ -17,10 +17,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// `index` is the last issue's scope, hence explicit routes instead of
-// `Route::apiResource(...)`. The `{vehicle}` parameter name is
-// load-bearing: `UpdateVehicleRequest` assumes `route('vehicle')`.
+// Explicit routes instead of `Route::apiResource(...)`. The `{vehicle}`
+// parameter name is load-bearing: `UpdateVehicleRequest` assumes
+// `route('vehicle')`. `index` is registered before `show` — otherwise
+// Laravel would try to resolve `/vehicles` as the `{vehicle}` parameter.
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/vehicles', [VehicleController::class, 'index']);
     Route::post('/vehicles', [VehicleController::class, 'store']);
     Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);
     Route::match(['put', 'patch'], '/vehicles/{vehicle}', [VehicleController::class, 'update']);
