@@ -2,19 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Vehicle\IndexVehicleRequest;
 use App\Http\Requests\Vehicle\StoreVehicleRequest;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
 use App\Services\VehicleImageService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class VehicleController extends Controller
 {
+    /**
+     * Default page size when the client doesn't send `per_page`.
+     */
+    private const DEFAULT_PER_PAGE = 15;
+
+    /**
+     * Hard cap on `per_page` so a client can't request an unbounded page
+     * size — a value above this is clamped down to it rather than
+     * rejected or ignored.
+     */
+    private const MAX_PER_PAGE = 100;
+
     public function __construct(private readonly VehicleImageService $vehicleImageService)
     {
+    }
+
+    /**
+     * List vehicles, paginated.
+     *
+     * `VehiclePolicy::viewAny` already allows any authenticated user, so
+     * this lists every vehicle in the system, not just the caller's own —
+     * consistent with `show()`, which likewise doesn't gate on ownership.
+     *
+     * `Vehicle::query()` is ordered by `id` (so pagination is deterministic)
+     * and paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to
+     * `Vehicle::scopeFilter()` (issue #30) so this method stays a thin
+     * pass-through of the validated input; sorting (issue #31) extends this
+     * same query rather than replacing it, via `Vehicle::scopeSort()`, and is
+     * chained *before* the trailing `orderBy('id')` so the requested fields
+     * take precedence and `id` only breaks ties among rows equal on all of
+     * them.
+     *
+     * `per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a
+     * client asking for an unbounded page size just gets the cap back.
+     * `VehicleResource::collection()` on a paginator carries `total`,
+     * `current_page`, `last_page` and `per_page` through automatically in
+     * the response's `meta` envelope, so no custom collection class is
+     * needed to satisfy those fields.
+     */
+    public function index(IndexVehicleRequest $request): AnonymousResourceCollection
+    {
+        $this->authorize('viewAny', Vehicle::class);
+
+        $perPage = min(
+            (int) ($request->validated('per_page') ?? self::DEFAULT_PER_PAGE),
+            self::MAX_PER_PAGE,
+        );
+
+        $vehicles = Vehicle::query()
+            ->filter($request->validated())
+            ->sort($request->validated('sort'))
+            ->orderBy('id')
+            ->paginate($perPage);
+
+        return VehicleResource::collection($vehicles);
     }
 
     /**
