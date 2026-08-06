@@ -38,9 +38,10 @@ class VehicleController extends Controller
      * this lists every vehicle in the system, not just the caller's own —
      * consistent with `show()`, which likewise doesn't gate on ownership.
      *
-     * Deliberately plain for now: no filters, no sorting, just
-     * `Vehicle::query()` ordered by `id` (so pagination is deterministic)
-     * and paginated. Later issues (#30 filters, #31 sorting) extend this
+     * `Vehicle::query()` is ordered by `id` (so pagination is deterministic)
+     * and paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to
+     * `Vehicle::scopeFilter()` (issue #30) so this method stays a thin
+     * pass-through of the validated input; sorting (issue #31) extends this
      * same query rather than replacing it.
      *
      * `per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a
@@ -59,7 +60,10 @@ class VehicleController extends Controller
             self::MAX_PER_PAGE,
         );
 
-        $vehicles = Vehicle::query()->orderBy('id')->paginate($perPage);
+        $vehicles = Vehicle::query()
+            ->filter($request->validated())
+            ->orderBy('id')
+            ->paginate($perPage);
 
         return VehicleResource::collection($vehicles);
     }
