@@ -191,8 +191,9 @@ o que já era o padrão adotado para os check constraints de `vehicles`.
 |----|---------|----------|
 | OPEN-01 | PAT como segunda credencial | Adiada para M8; só se sobrar tempo |
 | OPEN-03 | E2E com Playwright | Adiada para W9 |
-| OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Decidir ao implementar M4 |
+| OPEN-04 | Ao excluir a capa, promover outra imagem ou ficar sem capa | Resolvido no M4: fica sem capa, sem promoção automática |
 | OPEN-05 | Verificação de e-mail (`email_verified_at`, `MustVerifyEmail`) | Fora de escopo do desafio; coluna removida do baseline, adicionar se sobrar tempo |
+| OPEN-06 | Índice GIN com `pg_trgm` para acelerar `ILIKE '%valor%'` em `marca`/`modelo`/`placa` | Adiada; `ILIKE` com wildcard nas duas pontas não usa índice B-tree comum (sequential scan), mas irrelevante na escala do desafio (poucas dezenas de linhas). Adicionar se a base de dados crescer ou se quiser demonstrar a otimização |
 
 ---
 
