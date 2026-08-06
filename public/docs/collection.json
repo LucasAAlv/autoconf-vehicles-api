@@ -1,0 +1,683 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost:8000"
+        }
+    ],
+    "info": {
+        "name": "Autoconf Vehicles API Documentation",
+        "_postman_id": "df796fd5-8da7-4d33-b006-f1bc3848acdd",
+        "description": "API para um SaaS multiusu\u00e1rio de gest\u00e3o de ve\u00edculos: autentica\u00e7\u00e3o, cadastro de ve\u00edculos e gest\u00e3o de imagens com capa \u00fanica.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "description": "Registration, login, logout and the current authenticated user. This API is a\n**Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an\n`HttpOnly` session cookie, and every subsequent authenticated request must carry a\nvalid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by\n`GET \/sanctum\/csrf-cookie` \u2014 see the \"Authentication\" section above.",
+            "item": [
+                {
+                    "name": "Create a new user account.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/register",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/register"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"password\":\"Str0ng!Passw0rd\",\"password_confirmation\":\"Str0ng!Passw0rd\"}"
+                        },
+                        "description": "This does not also start an authenticated session: registration and\nlogin are kept as two separate, explicit steps, matching the plain\n`POST \/auth\/register` contract this endpoint promises. `User::create()`\nonly ever receives the request's own validated fields, so a payload\nthat also sends `is_admin` (or any other attribute) has no way to\ninfluence the created record.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"created_at\":\"2026-08-06T12:00:00.000000Z\",\"updated_at\":\"2026-08-06T12:00:00.000000Z\"}",
+                            "name": "Conta criada com sucesso. Note que isso n\u00e3o autentica o usu\u00e1rio \u2014 \u00e9 necess\u00e1rio chamar `POST \/auth\/login` em seguida."
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Content\",\"status\":422,\"detail\":\"The email has already been taken. (and 1 more error)\",\"instance\":\"\\\/api\\\/auth\\\/register\",\"errors\":{\"email\":[\"The email has already been taken.\"],\"password\":[\"The password field confirmation does not match.\"]}}",
+                            "name": "Payload inv\u00e1lido \u2014 e-mail j\u00e1 cadastrado, senha e confirma\u00e7\u00e3o n\u00e3o coincidem, ou campo obrigat\u00f3rio ausente."
+                        }
+                    ]
+                },
+                {
+                    "name": "Authenticate a user for the SPA's stateful (cookie) session.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"maria.souza@example.com\",\"password\":\"Str0ng!Passw0rd\"}"
+                        },
+                        "description": "`ValidationException::withMessages()` on a bad attempt is deliberate,\nnot just convenient: this app's exception renderer already turns any\n`ValidationException` into the same `application\/problem+json` 422\nenvelope used by Form Request validation, so a credentials failure\nlooks identical to any other validation failure to API consumers\nwithout the controller having to build that response by hand.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"created_at\":\"2026-08-06T12:00:00.000000Z\",\"updated_at\":\"2026-08-06T12:00:00.000000Z\"}",
+                            "name": "Login bem-sucedido. A resposta carrega o cookie de sess\u00e3o `HttpOnly`; o corpo \u00e9 o usu\u00e1rio autenticado."
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Content\",\"status\":422,\"detail\":\"These credentials do not match our records.\",\"instance\":\"\\\/api\\\/auth\\\/login\",\"errors\":{\"email\":[\"These credentials do not match our records.\"]}}",
+                            "name": "Credenciais inv\u00e1lidas. Mesmo formato `application\/problem+json` usado por qualquer outra falha de valida\u00e7\u00e3o (422)."
+                        }
+                    ]
+                },
+                {
+                    "name": "Return the currently authenticated user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "This route sits behind `auth:sanctum`, so a guest never reaches this\nmethod at all: Sanctum's own guard throws `AuthenticationException`\nfirst, which the app's exception renderer already turns into a\nproblem+json 401 (wired in `bootstrap\/app.php`)."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"created_at\":\"2026-08-06T12:00:00.000000Z\",\"updated_at\":\"2026-08-06T12:00:00.000000Z\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Unauthenticated.\",\"instance\":\"\\\/api\\\/auth\\\/me\"}",
+                            "name": "Nenhuma sess\u00e3o v\u00e1lida (cookie ausente\/expirado, ou `X-XSRF-TOKEN` ausente\/incorreto)."
+                        }
+                    ]
+                },
+                {
+                    "name": "End the SPA's authenticated session.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "The three steps mirror `login()`'s own care around sessions, in\nreverse: log the guard out, destroy the session data, and rotate the\nCSRF token, so neither the session id nor the CSRF token an attacker\nobserved before logout stays valid afterwards. `204 No Content` is\nused rather than `200` because there is no representation to return\nfor a logout."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "",
+                            "name": "Sess\u00e3o, dados de sess\u00e3o e token CSRF invalidados com sucesso."
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Unauthenticated.\",\"instance\":\"\\\/api\\\/auth\\\/logout\"}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Vehicles",
+            "description": "CRUD de ve\u00edculos. Qualquer usu\u00e1rio autenticado pode listar\/visualizar qualquer ve\u00edculo; apenas o dono (`user_id`) ou um usu\u00e1rio `is_admin` pode atualizar ou excluir.",
+            "item": [
+                {
+                    "name": "List vehicles, paginated.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles",
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "Corolla",
+                                    "description": "Busca livre (placa, chassi, marca, modelo ou vers\u00e3o).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "marca",
+                                    "value": "Toyota",
+                                    "description": "Filtra por marca exata.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "modelo",
+                                    "value": "Corolla",
+                                    "description": "Filtra por modelo exato.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "placa",
+                                    "value": "ABC1D23",
+                                    "description": "Filtra por placa exata.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "km,-valor_venda",
+                                    "description": "Lista separada por v\u00edrgulas de campos orden\u00e1veis (`km`, `valor_venda`, `marca`, `modelo`, `created_at`), cada um opcionalmente prefixado com `-` para ordem decrescente.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "N\u00famero da p\u00e1gina (1-indexado).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "15",
+                                    "description": "Itens por p\u00e1gina (padr\u00e3o 15, m\u00e1ximo 100 \u2014 valores maiores s\u00e3o reduzidos ao limite).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/vehicles?q=Corolla&marca=Toyota&modelo=Corolla&placa=ABC1D23&sort=km%2C-valor_venda&page=1&per_page=15"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"page\":16,\"per_page\":22,\"q\":\"architecto\",\"marca\":\"architecto\",\"modelo\":\"architecto\",\"placa\":\"architecto\",\"sort\":\"architecto\"}"
+                        },
+                        "description": "`VehiclePolicy::viewAny` already allows any authenticated user, so\nthis lists every vehicle in the system, not just the caller's own \u2014\nconsistent with `show()`, which likewise doesn't gate on ownership.\n\n`Vehicle::query()` is ordered by `id` (so pagination is deterministic)\nand paginated. `q`\/`marca`\/`modelo`\/`placa` filtering is delegated to\n`Vehicle::scopeFilter()` (issue #30) so this method stays a thin\npass-through of the validated input; sorting (issue #31) extends this\nsame query rather than replacing it, via `Vehicle::scopeSort()`, and is\nchained *before* the trailing `orderBy('id')` so the requested fields\ntake precedence and `id` only breaks ties among rows equal on all of\nthem.\n\n`per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a\nclient asking for an unbounded page size just gets the cap back.\n`VehicleResource::collection()` on a paginator carries `total`,\n`current_page`, `last_page` and `per_page` through automatically in\nthe response's `meta` envelope, so no custom collection class is\nneeded to satisfy those fields.\n\nNote: unlike `show()`\/`store()`\/`update()`, this list view never eager-loads\n`creator`\/`updater`\/`images`, so those keys are absent from each item here \u2014\nfetch `GET \/vehicles\/{vehicle}` for the full shape."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"id\":41,\"placa\":\"NGZ0A00\",\"chassi\":\"MIYVDLJNIKH000000\",\"marca\":\"Chevrolet\",\"modelo\":\"Kicks\",\"versao\":\"1.6 Turbo\",\"valor_venda\":\"152854.40\",\"cor\":\"fuchsia\",\"km\":208376,\"cambio\":\"manual\",\"combustivel\":\"gasolina\",\"user_id\":71,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"},{\"id\":42,\"placa\":\"SIT0A01\",\"chassi\":\"CPSCQLDZSNR000001\",\"marca\":\"Honda\",\"modelo\":\"Corolla\",\"versao\":\"Titanium\",\"valor_venda\":\"174593.24\",\"cor\":\"teal\",\"km\":138484,\"cambio\":\"automatico\",\"combustivel\":\"diesel\",\"user_id\":72,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}],\"links\":{\"first\":\"\\\/?page=1\",\"last\":\"\\\/?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":1,\"last_page\":1,\"links\":[{\"url\":null,\"label\":\"&laquo; Previous\",\"page\":null,\"active\":false},{\"url\":\"\\\/?page=1\",\"label\":\"1\",\"page\":1,\"active\":true},{\"url\":null,\"label\":\"Next &raquo;\",\"page\":null,\"active\":false}],\"path\":\"\\\/\",\"per_page\":15,\"to\":2,\"total\":2}}",
+                            "name": "P\u00e1gina de ve\u00edculos. `creator`\/`updater`\/`images` n\u00e3o s\u00e3o carregados nesta listagem."
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Unauthenticated.\",\"instance\":\"\\\/api\\\/vehicles\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Create a new vehicle owned by the authenticated user.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"placa\":\"ABC1D23\",\"chassi\":\"9BWZZZ377VT004251\",\"marca\":\"Toyota\",\"modelo\":\"Corolla\",\"versao\":\"XEi 2.0\",\"valor_venda\":129900,\"cor\":\"Prata\",\"km\":15000,\"cambio\":\"manual\",\"combustivel\":\"flex\"}"
+                        },
+                        "description": "`user_id` is not part of `$request->validated()` \u2014 it is not\nvalidated input at all, it is assigned directly from the\nauthenticated user, so a client can never influence it by including\nit in the payload (`Vehicle::$fillable` also excludes it, as a second\nline of defense). `created_by`\/`updated_by` are stamped separately by\n`VehicleObserver` on the `creating` event."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\":{\"id\":43,\"placa\":\"GZM0A02\",\"chassi\":\"IYVDLJNIKHW000002\",\"marca\":\"Ford\",\"modelo\":\"Cronos\",\"versao\":\"Comfortline\",\"valor_venda\":\"54132.38\",\"cor\":\"navy\",\"km\":237248,\"cambio\":\"manual\",\"combustivel\":\"gasolina\",\"user_id\":73,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\",\"creator\":null,\"updater\":null,\"images\":[{\"id\":31,\"path\":\"vehicles\\\/258\\\/f2726f3d-9044-3663-bede-2a0f37053879.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/258\\\/f2726f3d-9044-3663-bede-2a0f37053879.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}]}}",
+                            "name": "Ve\u00edculo criado. `images` vem vazio logo ap\u00f3s a cria\u00e7\u00e3o; `creator`\/`updater` refletem o usu\u00e1rio autenticado."
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Unauthenticated.\",\"instance\":\"\\\/api\\\/vehicles\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Content\",\"status\":422,\"detail\":\"The placa has already been taken. (and 1 more error)\",\"instance\":\"\\\/api\\\/vehicles\",\"errors\":{\"placa\":[\"J\\u00e1 existe um ve\\u00edculo cadastrado com essa placa.\"],\"chassi\":[\"J\\u00e1 existe um ve\\u00edculo cadastrado com esse chassi.\"]}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Show a single vehicle.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "`VehiclePolicy::view` currently allows any authenticated user\nregardless of ownership, so this call trivially passes today \u2014 it is\nwired in now so a later issue that tightens the policy doesn't need\nto touch this controller."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"id\":44,\"placa\":\"NGZ0A03\",\"chassi\":\"MIYVDLJNIKH000003\",\"marca\":\"Chevrolet\",\"modelo\":\"Kicks\",\"versao\":\"1.6 Turbo\",\"valor_venda\":\"152854.40\",\"cor\":\"fuchsia\",\"km\":208376,\"cambio\":\"manual\",\"combustivel\":\"gasolina\",\"user_id\":76,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\",\"creator\":null,\"updater\":null,\"images\":[{\"id\":32,\"path\":\"vehicles\\\/763\\\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/763\\\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}]}}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Unauthenticated.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/999\"}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Update a vehicle",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"placa\":\"ABC1D23\",\"chassi\":\"9BWZZZ377VT004251\",\"marca\":\"Toyota\",\"modelo\":\"Corolla\",\"versao\":\"XEi 2.0\",\"valor_venda\":134900,\"cor\":\"Preto\",\"km\":18000,\"cambio\":\"automatico\",\"combustivel\":\"flex\"}"
+                        },
+                        "description": "Both `PUT` and `PATCH` route here and behave identically: every field in `UpdateVehicleRequest`\nis `sometimes`, so an absent field is simply left untouched by `fill()` rather than nulled out \u2014\nthere is no \"PUT replaces everything\" distinction. `updated_by` is not set by the controller \u2014\n`VehicleObserver` stamps it from the authenticated user on the `updating` event."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"id\":45,\"placa\":\"GZM0A04\",\"chassi\":\"IYVDLJNIKHW000004\",\"marca\":\"Ford\",\"modelo\":\"Cronos\",\"versao\":\"Comfortline\",\"valor_venda\":\"54132.38\",\"cor\":\"navy\",\"km\":237248,\"cambio\":\"manual\",\"combustivel\":\"gasolina\",\"user_id\":79,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\",\"creator\":null,\"updater\":null,\"images\":[{\"id\":33,\"path\":\"vehicles\\\/945\\\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/945\\\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}]}}",
+                            "name": "Ve\u00edculo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma id\u00eantica)."
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"This action is unauthorized.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\"}",
+                            "name": "Usu\u00e1rio autenticado n\u00e3o \u00e9 o dono do ve\u00edculo nem `is_admin`."
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/999\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Content\",\"status\":422,\"detail\":\"The placa has already been taken.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\",\"errors\":{\"placa\":[\"J\\u00e1 existe um ve\\u00edculo cadastrado com essa placa.\"]}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete a vehicle.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "`vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw\nPostgreSQL level, so `VehicleImage` rows disappear automatically along\nwith the vehicle \u2014 but that cascade never fires an Eloquent event, so\n`VehicleImageService::deleteAllForVehicle()` is called, inside the same\ntransaction, to also clean up the physical files from the public disk\n(deferred to after the commit, so a rollback never leaves the vehicle\ngone but its images' files still on disk, or vice versa)."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "",
+                            "name": "Ve\u00edculo (e suas imagens, no banco e no storage) exclu\u00eddo com sucesso."
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"This action is unauthorized.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/999\"}",
+                            "name": ""
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Images",
+            "description": "Upload e gest\u00e3o de imagens de um ve\u00edculo, incluindo a capa \u00fanica (`is_cover`). Assim como `update`\/`delete` de ve\u00edculos, apenas o dono do ve\u00edculo ou um usu\u00e1rio `is_admin` pode gerenciar suas imagens.",
+            "item": [
+                {
+                    "name": "Upload one or more images for a vehicle.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id\/images",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id\/images",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "files[]",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "`VehiclePolicy::manageImages` gates this the same way `update`\/`delete`\nalready gate their own actions: only the vehicle's owner or an\n`is_admin` user may add images to it."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\"data\":[{\"id\":34,\"path\":\"vehicles\\\/169\\\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/169\\\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"},{\"id\":35,\"path\":\"vehicles\\\/247\\\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/247\\\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}]}",
+                            "name": "Imagens criadas. A primeira imagem j\u00e1 enviada para um ve\u00edculo \u00e9 automaticamente marcada como `is_cover`."
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"This action is unauthorized.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/999\\\/images\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Unprocessable Content\",\"status\":422,\"detail\":\"Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\",\"errors\":{\"files.0\":[\"Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.\"]}}",
+                            "name": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Set the cover of a vehicle to one of its own images.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id\/images\/:imageId\/cover",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id\/images\/:imageId\/cover",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                },
+                                {
+                                    "id": "imageId",
+                                    "key": "imageId",
+                                    "value": 1,
+                                    "description": "Id da imagem (deve pertencer ao ve\u00edculo informado)."
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "`{imageId}` is resolved manually (`vehicle_id`-scoped query +\n`findOrFail`) instead of via implicit nested route-model binding:\nnested binding would need `{vehicle}` and `{image}` to be related\nthrough a named Eloquent relationship matching the route segment,\nwhereas here the check that the image actually belongs to this\nvehicle *is* the interesting behaviour (an image from a different\nvehicle must 404, not 403), so it is spelled out explicitly.\n`findOrFail` throws a `ModelNotFoundException`, which the exception\nhandler in `bootstrap\/app.php` already rewrites into a 404\n`application\/problem+json` response \u2014 nothing extra to do here for\neither \"wrong vehicle\" or \"no such image\"."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"id\":36,\"path\":\"vehicles\\\/760\\\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg\",\"url\":\"http:\\\/\\\/localhost:8000\\\/storage\\\/vehicles\\\/760\\\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg\",\"is_cover\":false,\"created_at\":\"2026-08-06T22:24:39.000000Z\",\"updated_at\":\"2026-08-06T22:24:39.000000Z\"}}",
+                            "name": "Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste ve\u00edculo deixa de s\u00ea-lo, de forma transacional."
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"This action is unauthorized.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\\\/1\\\/cover\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\\\/999\\\/cover\"}",
+                            "name": "Tamb\u00e9m retornado quando a imagem existe mas pertence a outro ve\u00edculo."
+                        }
+                    ]
+                },
+                {
+                    "name": "Delete a single image belonging to a vehicle.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/vehicles\/:vehicle_id\/images\/:imageId",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/vehicles\/:vehicle_id\/images\/:imageId",
+                            "variable": [
+                                {
+                                    "id": "vehicle_id",
+                                    "key": "vehicle_id",
+                                    "value": 1,
+                                    "description": "Id do ve\u00edculo."
+                                },
+                                {
+                                    "id": "imageId",
+                                    "key": "imageId",
+                                    "value": 1,
+                                    "description": "Id da imagem (deve pertencer ao ve\u00edculo informado)."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "The image is looked up through `$vehicle->images()` rather than a\nglobal `VehicleImage::findOrFail()` (or implicit route-model binding\non `{imageId}`): this guarantees an image belonging to a different\nvehicle 404s exactly like one that doesn't exist at all, instead of\nleaking a 403 (or succeeding) for an id that is real but not \"this\nvehicle's\"."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 204,
+                            "body": "",
+                            "name": "Imagem exclu\u00edda do banco e o arquivo f\u00edsico removido do storage."
+                        },
+                        {
+                            "header": [],
+                            "code": 403,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Forbidden\",\"status\":403,\"detail\":\"This action is unauthorized.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\\\/1\"}",
+                            "name": ""
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\"type\":\"about:blank\",\"title\":\"Not Found\",\"status\":404,\"detail\":\"The requested resource was not found.\",\"instance\":\"\\\/api\\\/vehicles\\\/1\\\/images\\\/999\"}",
+                            "name": "Tamb\u00e9m retornado quando a imagem existe mas pertence a outro ve\u00edculo."
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "noauth"
+    }
+}

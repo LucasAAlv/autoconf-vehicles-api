@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Cambio;
+use App\Enums\Combustivel;
 use App\Http\Requests\Vehicle\IndexVehicleRequest;
 use App\Http\Requests\Vehicle\StoreVehicleRequest;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
@@ -12,7 +14,20 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Knuckles\Scribe\Attributes\Authenticated;
+use Knuckles\Scribe\Attributes\BodyParam;
+use Knuckles\Scribe\Attributes\Endpoint;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\QueryParam;
+use Knuckles\Scribe\Attributes\Response as ResponseExample;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
+use Knuckles\Scribe\Attributes\UrlParam;
 
+#[Group(
+    name: 'Vehicles',
+    description: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.',
+)]
+#[Authenticated]
 class VehicleController extends Controller
 {
     /**
@@ -53,7 +68,32 @@ class VehicleController extends Controller
      * `current_page`, `last_page` and `per_page` through automatically in
      * the response's `meta` envelope, so no custom collection class is
      * needed to satisfy those fields.
+     *
+     * Note: unlike `show()`/`store()`/`update()`, this list view never eager-loads
+     * `creator`/`updater`/`images`, so those keys are absent from each item here —
+     * fetch `GET /vehicles/{vehicle}` for the full shape.
      */
+    #[QueryParam('q', 'string', 'Busca livre (placa, chassi, marca, modelo ou versão).', required: false, example: 'Corolla')]
+    #[QueryParam('marca', 'string', 'Filtra por marca exata.', required: false, example: 'Toyota')]
+    #[QueryParam('modelo', 'string', 'Filtra por modelo exato.', required: false, example: 'Corolla')]
+    #[QueryParam('placa', 'string', 'Filtra por placa exata.', required: false, example: 'ABC1D23')]
+    #[QueryParam('sort', 'string', 'Lista separada por vírgulas de campos ordenáveis (`km`, `valor_venda`, `marca`, `modelo`, `created_at`), cada um opcionalmente prefixado com `-` para ordem decrescente.', required: false, example: 'km,-valor_venda')]
+    #[QueryParam('page', 'integer', 'Número da página (1-indexado).', required: false, example: 1)]
+    #[QueryParam('per_page', 'integer', 'Itens por página (padrão 15, máximo 100 — valores maiores são reduzidos ao limite).', required: false, example: 15)]
+    #[ResponseFromApiResource(
+        VehicleResource::class,
+        model: Vehicle::class,
+        collection: true,
+        paginate: 15,
+        description: 'Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.',
+    )]
+    #[ResponseExample(status: 401, content: [
+        'type' => 'about:blank',
+        'title' => 'Unauthorized',
+        'status' => 401,
+        'detail' => 'Unauthenticated.',
+        'instance' => '/api/vehicles',
+    ])]
     public function index(IndexVehicleRequest $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Vehicle::class);
@@ -82,6 +122,41 @@ class VehicleController extends Controller
      * line of defense). `created_by`/`updated_by` are stamped separately by
      * `VehicleObserver` on the `creating` event.
      */
+    #[BodyParam('placa', 'string', 'Placa única (formato Mercosul ou tradicional).', example: 'ABC1D23')]
+    #[BodyParam('chassi', 'string', 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).', example: '9BWZZZ377VT004251')]
+    #[BodyParam('marca', 'string', 'Marca do veículo.', example: 'Toyota')]
+    #[BodyParam('modelo', 'string', 'Modelo do veículo.', example: 'Corolla')]
+    #[BodyParam('versao', 'string', 'Versão/trim do veículo.', example: 'XEi 2.0')]
+    #[BodyParam('valor_venda', 'number', 'Valor de venda em reais, mínimo 0.01.', example: 129900.00)]
+    #[BodyParam('cor', 'string', 'Cor do veículo.', example: 'Prata')]
+    #[BodyParam('km', 'integer', 'Quilometragem, inteiro não negativo.', example: 15000)]
+    #[BodyParam('cambio', 'string', 'Tipo de câmbio.', enum: Cambio::class, example: 'manual')]
+    #[BodyParam('combustivel', 'string', 'Tipo de combustível.', enum: Combustivel::class, example: 'flex')]
+    #[ResponseFromApiResource(
+        VehicleResource::class,
+        model: Vehicle::class,
+        status: 201,
+        with: ['creator', 'updater', 'images'],
+        description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.',
+    )]
+    #[ResponseExample(status: 422, content: [
+        'type' => 'about:blank',
+        'title' => 'Unprocessable Content',
+        'status' => 422,
+        'detail' => 'The placa has already been taken. (and 1 more error)',
+        'instance' => '/api/vehicles',
+        'errors' => [
+            'placa' => ['Já existe um veículo cadastrado com essa placa.'],
+            'chassi' => ['Já existe um veículo cadastrado com esse chassi.'],
+        ],
+    ])]
+    #[ResponseExample(status: 401, content: [
+        'type' => 'about:blank',
+        'title' => 'Unauthorized',
+        'status' => 401,
+        'detail' => 'Unauthenticated.',
+        'instance' => '/api/vehicles',
+    ])]
     public function store(StoreVehicleRequest $request): JsonResponse
     {
         $vehicle = new Vehicle($request->validated());
@@ -107,6 +182,26 @@ class VehicleController extends Controller
      * wired in now so a later issue that tightens the policy doesn't need
      * to touch this controller.
      */
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[ResponseFromApiResource(
+        VehicleResource::class,
+        model: Vehicle::class,
+        with: ['creator', 'updater', 'images'],
+    )]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/999',
+    ])]
+    #[ResponseExample(status: 401, content: [
+        'type' => 'about:blank',
+        'title' => 'Unauthorized',
+        'status' => 401,
+        'detail' => 'Unauthenticated.',
+        'instance' => '/api/vehicles/1',
+    ])]
     public function show(Vehicle $vehicle): VehicleResource
     {
         $this->authorize('view', $vehicle);
@@ -125,6 +220,56 @@ class VehicleController extends Controller
      * `updated_by` is not set here — `VehicleObserver` stamps it from the
      * authenticated user on the `updating` event.
      */
+    #[Endpoint(
+        title: 'Update a vehicle',
+        description: <<<'DESC'
+            Both `PUT` and `PATCH` route here and behave identically: every field in `UpdateVehicleRequest`
+            is `sometimes`, so an absent field is simply left untouched by `fill()` rather than nulled out —
+            there is no "PUT replaces everything" distinction. `updated_by` is not set by the controller —
+            `VehicleObserver` stamps it from the authenticated user on the `updating` event.
+            DESC,
+    )]
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[BodyParam('placa', 'string', 'Placa única (formato Mercosul ou tradicional).', required: false, example: 'ABC1D23')]
+    #[BodyParam('chassi', 'string', 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).', required: false, example: '9BWZZZ377VT004251')]
+    #[BodyParam('marca', 'string', 'Marca do veículo.', required: false, example: 'Toyota')]
+    #[BodyParam('modelo', 'string', 'Modelo do veículo.', required: false, example: 'Corolla')]
+    #[BodyParam('versao', 'string', 'Versão/trim do veículo.', required: false, example: 'XEi 2.0')]
+    #[BodyParam('valor_venda', 'number', 'Valor de venda em reais, mínimo 0.01.', required: false, example: 134900.00)]
+    #[BodyParam('cor', 'string', 'Cor do veículo.', required: false, example: 'Preto')]
+    #[BodyParam('km', 'integer', 'Quilometragem, inteiro não negativo.', required: false, example: 18000)]
+    #[BodyParam('cambio', 'string', 'Tipo de câmbio.', required: false, enum: Cambio::class, example: 'automatico')]
+    #[BodyParam('combustivel', 'string', 'Tipo de combustível.', required: false, enum: Combustivel::class, example: 'flex')]
+    #[ResponseFromApiResource(
+        VehicleResource::class,
+        model: Vehicle::class,
+        with: ['creator', 'updater', 'images'],
+        description: 'Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).',
+    )]
+    #[ResponseExample(status: 403, content: [
+        'type' => 'about:blank',
+        'title' => 'Forbidden',
+        'status' => 403,
+        'detail' => 'This action is unauthorized.',
+        'instance' => '/api/vehicles/1',
+    ], description: 'Usuário autenticado não é o dono do veículo nem `is_admin`.')]
+    #[ResponseExample(status: 422, content: [
+        'type' => 'about:blank',
+        'title' => 'Unprocessable Content',
+        'status' => 422,
+        'detail' => 'The placa has already been taken.',
+        'instance' => '/api/vehicles/1',
+        'errors' => [
+            'placa' => ['Já existe um veículo cadastrado com essa placa.'],
+        ],
+    ])]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/999',
+    ])]
     public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
     {
         $this->authorize('update', $vehicle);
@@ -148,6 +293,22 @@ class VehicleController extends Controller
      * (deferred to after the commit, so a rollback never leaves the vehicle
      * gone but its images' files still on disk, or vice versa).
      */
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[ResponseExample(status: 204, content: '', description: 'Veículo (e suas imagens, no banco e no storage) excluído com sucesso.')]
+    #[ResponseExample(status: 403, content: [
+        'type' => 'about:blank',
+        'title' => 'Forbidden',
+        'status' => 403,
+        'detail' => 'This action is unauthorized.',
+        'instance' => '/api/vehicles/1',
+    ])]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/999',
+    ])]
     public function destroy(Vehicle $vehicle): Response
     {
         $this->authorize('delete', $vehicle);

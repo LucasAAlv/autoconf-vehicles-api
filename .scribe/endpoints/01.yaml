@@ -1,0 +1,753 @@
+name: Vehicles
+description: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/vehicles
+    metadata:
+      custom: []
+      groupName: Vehicles
+      groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List vehicles, paginated.'
+      description: |-
+        `VehiclePolicy::viewAny` already allows any authenticated user, so
+        this lists every vehicle in the system, not just the caller's own —
+        consistent with `show()`, which likewise doesn't gate on ownership.
+
+        `Vehicle::query()` is ordered by `id` (so pagination is deterministic)
+        and paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to
+        `Vehicle::scopeFilter()` (issue #30) so this method stays a thin
+        pass-through of the validated input; sorting (issue #31) extends this
+        same query rather than replacing it, via `Vehicle::scopeSort()`, and is
+        chained *before* the trailing `orderBy('id')` so the requested fields
+        take precedence and `id` only breaks ties among rows equal on all of
+        them.
+
+        `per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a
+        client asking for an unbounded page size just gets the cap back.
+        `VehicleResource::collection()` on a paginator carries `total`,
+        `current_page`, `last_page` and `per_page` through automatically in
+        the response's `meta` envelope, so no custom collection class is
+        needed to satisfy those fields.
+
+        Note: unlike `show()`/`store()`/`update()`, this list view never eager-loads
+        `creator`/`updater`/`images`, so those keys are absent from each item here —
+        fetch `GET /vehicles/{vehicle}` for the full shape.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      q:
+        custom: []
+        name: q
+        description: 'Busca livre (placa, chassi, marca, modelo ou versão).'
+        required: false
+        example: Corolla
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      marca:
+        custom: []
+        name: marca
+        description: 'Filtra por marca exata.'
+        required: false
+        example: Toyota
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      modelo:
+        custom: []
+        name: modelo
+        description: 'Filtra por modelo exato.'
+        required: false
+        example: Corolla
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      placa:
+        custom: []
+        name: placa
+        description: 'Filtra por placa exata.'
+        required: false
+        example: ABC1D23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: 'Lista separada por vírgulas de campos ordenáveis (`km`, `valor_venda`, `marca`, `modelo`, `created_at`), cada um opcionalmente prefixado com `-` para ordem decrescente.'
+        required: false
+        example: 'km,-valor_venda'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Número da página (1-indexado).'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Itens por página (padrão 15, máximo 100 — valores maiores são reduzidos ao limite).'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      q: Corolla
+      marca: Toyota
+      modelo: Corolla
+      placa: ABC1D23
+      sort: 'km,-valor_venda'
+      page: 1
+      per_page: 15
+    bodyParameters:
+      page:
+        custom: []
+        name: page
+        description: 'Must be at least 1.'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      q:
+        custom: []
+        name: q
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      marca:
+        custom: []
+        name: marca
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      modelo:
+        custom: []
+        name: modelo
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      placa:
+        custom: []
+        name: placa
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sort:
+        custom: []
+        name: sort
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      page: 16
+      per_page: 22
+      q: architecto
+      marca: architecto
+      modelo: architecto
+      placa: architecto
+      sort: architecto
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":[{"id":41,"placa":"NGZ0A00","chassi":"MIYVDLJNIKH000000","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":71,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"},{"id":42,"placa":"SIT0A01","chassi":"CPSCQLDZSNR000001","marca":"Honda","modelo":"Corolla","versao":"Titanium","valor_venda":"174593.24","cor":"teal","km":138484,"cambio":"automatico","combustivel":"diesel","user_id":72,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
+        headers: []
+        description: 'Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.'
+      -
+        custom: []
+        status: 401
+        content: '{"type":"about:blank","title":"Unauthorized","status":401,"detail":"Unauthenticated.","instance":"\/api\/vehicles"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/vehicles
+    metadata:
+      custom: []
+      groupName: Vehicles
+      groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create a new vehicle owned by the authenticated user.'
+      description: |-
+        `user_id` is not part of `$request->validated()` — it is not
+        validated input at all, it is assigned directly from the
+        authenticated user, so a client can never influence it by including
+        it in the payload (`Vehicle::$fillable` also excludes it, as a second
+        line of defense). `created_by`/`updated_by` are stamped separately by
+        `VehicleObserver` on the `creating` event.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      placa:
+        custom: []
+        name: placa
+        description: 'Placa única (formato Mercosul ou tradicional).'
+        required: true
+        example: ABC1D23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      chassi:
+        custom: []
+        name: chassi
+        description: 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).'
+        required: true
+        example: 9BWZZZ377VT004251
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      marca:
+        custom: []
+        name: marca
+        description: 'Marca do veículo.'
+        required: true
+        example: Toyota
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      modelo:
+        custom: []
+        name: modelo
+        description: 'Modelo do veículo.'
+        required: true
+        example: Corolla
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      versao:
+        custom: []
+        name: versao
+        description: 'Versão/trim do veículo.'
+        required: true
+        example: 'XEi 2.0'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      valor_venda:
+        custom: []
+        name: valor_venda
+        description: 'Valor de venda em reais, mínimo 0.01.'
+        required: true
+        example: 129900.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cor:
+        custom: []
+        name: cor
+        description: 'Cor do veículo.'
+        required: true
+        example: Prata
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      km:
+        custom: []
+        name: km
+        description: 'Quilometragem, inteiro não negativo.'
+        required: true
+        example: 15000
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cambio:
+        custom: []
+        name: cambio
+        description: 'Tipo de câmbio.'
+        required: true
+        example: manual
+        type: string
+        enumValues:
+          - manual
+          - automatico
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      combustivel:
+        custom: []
+        name: combustivel
+        description: 'Tipo de combustível.'
+        required: true
+        example: flex
+        type: string
+        enumValues:
+          - gasolina
+          - alcool
+          - flex
+          - diesel
+          - hibrido
+          - eletrico
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      placa: ABC1D23
+      chassi: 9BWZZZ377VT004251
+      marca: Toyota
+      modelo: Corolla
+      versao: 'XEi 2.0'
+      valor_venda: 129900.0
+      cor: Prata
+      km: 15000
+      cambio: manual
+      combustivel: flex
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data":{"id":43,"placa":"GZM0A02","chassi":"IYVDLJNIKHW000002","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":73,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":31,"path":"vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        headers: []
+        description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.'
+      -
+        custom: []
+        status: 401
+        content: '{"type":"about:blank","title":"Unauthorized","status":401,"detail":"Unauthenticated.","instance":"\/api\/vehicles"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"The placa has already been taken. (and 1 more error)","instance":"\/api\/vehicles","errors":{"placa":["J\u00e1 existe um ve\u00edculo cadastrado com essa placa."],"chassi":["J\u00e1 existe um ve\u00edculo cadastrado com esse chassi."]}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/vehicles/{vehicle_id}'
+    metadata:
+      custom: []
+      groupName: Vehicles
+      groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Show a single vehicle.'
+      description: |-
+        `VehiclePolicy::view` currently allows any authenticated user
+        regardless of ownership, so this call trivially passes today — it is
+        wired in now so a later issue that tightens the policy doesn't need
+        to touch this controller.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"id":44,"placa":"NGZ0A03","chassi":"MIYVDLJNIKH000003","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":76,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":32,"path":"vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 401
+        content: '{"type":"about:blank","title":"Unauthorized","status":401,"detail":"Unauthenticated.","instance":"\/api\/vehicles\/1"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/vehicles/{vehicle_id}'
+    metadata:
+      custom: []
+      groupName: Vehicles
+      groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update a vehicle'
+      description: |-
+        Both `PUT` and `PATCH` route here and behave identically: every field in `UpdateVehicleRequest`
+        is `sometimes`, so an absent field is simply left untouched by `fill()` rather than nulled out —
+        there is no "PUT replaces everything" distinction. `updated_by` is not set by the controller —
+        `VehicleObserver` stamps it from the authenticated user on the `updating` event.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      placa:
+        custom: []
+        name: placa
+        description: 'Placa única (formato Mercosul ou tradicional).'
+        required: false
+        example: ABC1D23
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      chassi:
+        custom: []
+        name: chassi
+        description: 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).'
+        required: false
+        example: 9BWZZZ377VT004251
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      marca:
+        custom: []
+        name: marca
+        description: 'Marca do veículo.'
+        required: false
+        example: Toyota
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      modelo:
+        custom: []
+        name: modelo
+        description: 'Modelo do veículo.'
+        required: false
+        example: Corolla
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      versao:
+        custom: []
+        name: versao
+        description: 'Versão/trim do veículo.'
+        required: false
+        example: 'XEi 2.0'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      valor_venda:
+        custom: []
+        name: valor_venda
+        description: 'Valor de venda em reais, mínimo 0.01.'
+        required: false
+        example: 134900.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cor:
+        custom: []
+        name: cor
+        description: 'Cor do veículo.'
+        required: false
+        example: Preto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      km:
+        custom: []
+        name: km
+        description: 'Quilometragem, inteiro não negativo.'
+        required: false
+        example: 18000
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cambio:
+        custom: []
+        name: cambio
+        description: 'Tipo de câmbio.'
+        required: false
+        example: automatico
+        type: string
+        enumValues:
+          - manual
+          - automatico
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      combustivel:
+        custom: []
+        name: combustivel
+        description: 'Tipo de combustível.'
+        required: false
+        example: flex
+        type: string
+        enumValues:
+          - gasolina
+          - alcool
+          - flex
+          - diesel
+          - hibrido
+          - eletrico
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      placa: ABC1D23
+      chassi: 9BWZZZ377VT004251
+      marca: Toyota
+      modelo: Corolla
+      versao: 'XEi 2.0'
+      valor_venda: 134900.0
+      cor: Preto
+      km: 18000
+      cambio: automatico
+      combustivel: flex
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"id":45,"placa":"GZM0A04","chassi":"IYVDLJNIKHW000004","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":79,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":33,"path":"vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        headers: []
+        description: 'Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).'
+      -
+        custom: []
+        status: 403
+        content: '{"type":"about:blank","title":"Forbidden","status":403,"detail":"This action is unauthorized.","instance":"\/api\/vehicles\/1"}'
+        headers: []
+        description: 'Usuário autenticado não é o dono do veículo nem `is_admin`.'
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"The placa has already been taken.","instance":"\/api\/vehicles\/1","errors":{"placa":["J\u00e1 existe um ve\u00edculo cadastrado com essa placa."]}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/vehicles/{vehicle_id}'
+    metadata:
+      custom: []
+      groupName: Vehicles
+      groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete a vehicle.'
+      description: |-
+        `vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw
+        PostgreSQL level, so `VehicleImage` rows disappear automatically along
+        with the vehicle — but that cascade never fires an Eloquent event, so
+        `VehicleImageService::deleteAllForVehicle()` is called, inside the same
+        transaction, to also clean up the physical files from the public disk
+        (deferred to after the commit, so a rollback never leaves the vehicle
+        gone but its images' files still on disk, or vice versa).
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 204
+        content: ''
+        headers: []
+        description: 'Veículo (e suas imagens, no banco e no storage) excluído com sucesso.'
+      -
+        custom: []
+        status: 403
+        content: '{"type":"about:blank","title":"Forbidden","status":403,"detail":"This action is unauthorized.","instance":"\/api\/vehicles\/1"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
