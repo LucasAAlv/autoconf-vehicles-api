@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\VehicleImageFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VehicleImage extends Model
 {
+    /** @use HasFactory<VehicleImageFactory> */
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *

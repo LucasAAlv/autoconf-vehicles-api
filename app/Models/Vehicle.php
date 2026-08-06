@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Enums\Cambio;
 use App\Enums\Combustivel;
 use App\Observers\VehicleObserver;
+use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[ObservedBy(VehicleObserver::class)]
 class Vehicle extends Model
 {
+    /** @use HasFactory<VehicleFactory> */
+    use HasFactory;
+
     /**
      * Allow-list of columns a client may sort by via the `sort` query
      * parameter on `GET /vehicles` (issue #31), keyed by the field name a
