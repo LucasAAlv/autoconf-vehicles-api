@@ -29,9 +29,21 @@ it('creates the vehicles table with the expected columns', function () {
     }
 });
 
-it('does not create created_by or updated_by columns', function () {
+it('creates created_by and updated_by as nullable columns', function () {
     foreach (['created_by', 'updated_by'] as $column) {
-        expect(Schema::hasColumn('vehicles', $column))->toBeFalse("Expected column [{$column}] not to exist yet.");
+        expect(Schema::hasColumn('vehicles', $column))->toBeTrue("Expected column [{$column}] to exist.");
+    }
+});
+
+it('has foreign keys from created_by and updated_by to users that set null on delete', function () {
+    $foreignKeys = collect(Schema::getForeignKeys('vehicles'));
+
+    foreach (['created_by', 'updated_by'] as $column) {
+        $foreignKey = $foreignKeys->first(fn ($fk) => in_array($column, $fk['columns'], true));
+
+        expect($foreignKey)->not->toBeNull()
+            ->and($foreignKey['foreign_table'])->toBe('users')
+            ->and($foreignKey['on_delete'])->toBe('set null');
     }
 });
 
