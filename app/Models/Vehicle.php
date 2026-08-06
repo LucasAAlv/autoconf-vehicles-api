@@ -6,6 +6,7 @@ use App\Enums\Cambio;
 use App\Enums\Combustivel;
 use App\Observers\VehicleObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -92,5 +93,43 @@ class Vehicle extends Model
     public function images(): HasMany
     {
         return $this->hasMany(VehicleImage::class);
+    }
+
+    /**
+     * Apply the allow-listed, hand-written filters from `IndexVehicleRequest`
+     * (ADR-008 — no `spatie/laravel-query-builder`) to a listing query.
+     *
+     * `marca`, `modelo` and `placa` each narrow the query independently by a
+     * case-insensitive partial match (`ILIKE '%value%'`) against their own
+     * column. `q` is a single free-text term matched the same way — partial,
+     * case-insensitive — but against `placa` OR `marca` OR `modelo`: any one
+     * of the three hitting is enough. That `OR` group is wrapped in its own
+     * `where(fn () => ...)` closure so it stays self-contained and never
+     * leaks out to `orWhere` the other filters, which is what lets every
+     * present filter narrow the result set further instead of the query
+     * turning into a union the moment more than one filter is given. All
+     * four filters use `ILIKE` (not `LIKE`) for case-insensitive matching,
+     * which is PostgreSQL-specific — consistent with the rest of this
+     * codebase already requiring PostgreSQL. Values are always bound as
+     * query parameters (`where($column, 'ilike', $value)`), never
+     * interpolated into a raw SQL string.
+     *
+     * @param  Builder<Vehicle>  $query
+     * @param  array<string, mixed>  $filters
+     * @return Builder<Vehicle>
+     */
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->when($filters['marca'] ?? null, fn (Builder $query, string $marca) => $query->where('marca', 'ilike', "%{$marca}%"))
+            ->when($filters['modelo'] ?? null, fn (Builder $query, string $modelo) => $query->where('modelo', 'ilike', "%{$modelo}%"))
+            ->when($filters['placa'] ?? null, fn (Builder $query, string $placa) => $query->where('placa', 'ilike', "%{$placa}%"))
+            ->when($filters['q'] ?? null, function (Builder $query, string $q) {
+                $query->where(function (Builder $query) use ($q) {
+                    $query->where('placa', 'ilike', "%{$q}%")
+                        ->orWhere('marca', 'ilike', "%{$q}%")
+                        ->orWhere('modelo', 'ilike', "%{$q}%");
+                });
+            });
     }
 }

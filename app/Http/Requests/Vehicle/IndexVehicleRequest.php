@@ -22,6 +22,11 @@ class IndexVehicleRequest extends FormRequest
      * default and caps `per_page` on its own — but when present they must be
      * positive integers.
      *
+     * `q`, `marca`, `modelo` and `placa` are all optional free-text filters:
+     * `Vehicle::scopeFilter()` is the one that decides how each is matched
+     * against the query, this request only checks they are strings when
+     * present.
+     *
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -29,6 +34,10 @@ class IndexVehicleRequest extends FormRequest
         return [
             'page'     => ['sometimes', 'integer', 'min:1'],
             'per_page' => ['sometimes', 'integer', 'min:1'],
+            'q'        => ['sometimes', 'string'],
+            'marca'    => ['sometimes', 'string'],
+            'modelo'   => ['sometimes', 'string'],
+            'placa'    => ['sometimes', 'string'],
         ];
     }
 }
