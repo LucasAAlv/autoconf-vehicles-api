@@ -24,3 +24,5 @@ Homestead.yaml
 Thumbs.db
 /.claude/memory
 /.claude/context/local
+/_ide_helper.php
+/.phpstorm.meta.php
