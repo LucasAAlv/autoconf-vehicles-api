@@ -20,11 +20,11 @@ use Knuckles\Scribe\Attributes\Unauthenticated;
 #[Group(
     name: 'Auth',
     description: <<<'DESC'
-        Registration, login, logout and the current authenticated user. This API is a
-        **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-        `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-        valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-        `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+        Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+        Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+        cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+        carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+        entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
         DESC,
 )]
 class AuthController extends Controller
@@ -51,15 +51,19 @@ class AuthController extends Controller
         'created_at' => '2026-08-06T12:00:00.000000Z',
         'updated_at' => '2026-08-06T12:00:00.000000Z',
     ], description: 'Conta criada com sucesso. Note que isso não autentica o usuário — é necessário chamar `POST /auth/login` em seguida.')]
+    // The "(and 1 more error)" suffix is Laravel's own `ValidationException`
+    // message format, always in English regardless of the `errors` member's
+    // language — kept as-is here to match real behavior, not a translation
+    // gap in this app.
     #[ResponseExample(status: 422, content: [
         'type' => 'about:blank',
         'title' => 'Unprocessable Content',
         'status' => 422,
-        'detail' => 'The email has already been taken. (and 1 more error)',
+        'detail' => 'Já existe uma conta cadastrada com esse e-mail. (and 1 more error)',
         'instance' => '/api/auth/register',
         'errors' => [
-            'email' => ['The email has already been taken.'],
-            'password' => ['The password field confirmation does not match.'],
+            'email' => ['Já existe uma conta cadastrada com esse e-mail.'],
+            'password' => ['A confirmação de senha não corresponde.'],
         ],
     ], description: 'Payload inválido — e-mail já cadastrado, senha e confirmação não coincidem, ou campo obrigatório ausente.')]
     public function register(RegisterRequest $request): JsonResponse
@@ -93,17 +97,17 @@ class AuthController extends Controller
         'type' => 'about:blank',
         'title' => 'Unprocessable Content',
         'status' => 422,
-        'detail' => 'These credentials do not match our records.',
+        'detail' => 'Essas credenciais não correspondem aos nossos registros.',
         'instance' => '/api/auth/login',
         'errors' => [
-            'email' => ['These credentials do not match our records.'],
+            'email' => ['Essas credenciais não correspondem aos nossos registros.'],
         ],
     ], description: 'Credenciais inválidas. Mesmo formato `application/problem+json` usado por qualquer outra falha de validação (422).')]
     public function login(LoginRequest $request): JsonResponse
     {
         if (! Auth::attempt($request->credentials())) {
             throw ValidationException::withMessages([
-                'email' => [trans('auth.failed')],
+                'email' => ['Essas credenciais não correspondem aos nossos registros.'],
             ]);
         }
 

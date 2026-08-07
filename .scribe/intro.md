@@ -6,18 +6,18 @@ API para um SaaS multiusuário de gestão de veículos: autenticação, cadastro
     <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
 
-This documentation covers every endpoint exposed by the Autoconf Vehicles API: authentication, vehicle CRUD, and vehicle image management.
+Esta documentação cobre todo endpoint exposto pela API Autoconf Vehicles: autenticação, CRUD de veículos e gestão de imagens de veículos.
 
-<aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
-You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
+<aside>Ao rolar a página, você verá exemplos de código para consumir a API em diferentes linguagens de programação na área escura à direita (ou como parte do conteúdo no celular).
+É possível trocar a linguagem usada pelas abas no canto superior direito (ou pelo menu de navegação no canto superior esquerdo no celular).</aside>
 
-## Authentication
+## Autenticação
 
-This API is a **Laravel Sanctum SPA** — it is authenticated by an `HttpOnly` session cookie, not a bearer token. There is no API key to type into these docs. To authenticate from this page:
+Esta API é uma **SPA Laravel Sanctum** — autenticada por um cookie de sessão `HttpOnly`, não por um bearer token. Não existe uma API key pra digitar nesta doc. Para se autenticar a partir desta página:
 
-1. Call **`POST /auth/register`** (or use an existing account) and then **`POST /auth/login`** using the "Try It Out" button. A successful login sets the session cookie in your browser.
-2. From then on, every other "Try It Out" call on this page automatically fetches a fresh CSRF cookie from `GET /sanctum/csrf-cookie` and sends its value back as the `X-XSRF-TOKEN` header, exactly like the real front-end SPA does — you don't need to copy any token by hand.
-3. `POST /auth/logout` clears both the session and the CSRF token.
+1. Chame **`POST /auth/register`** (ou use uma conta existente) e depois **`POST /auth/login`** usando o botão "Try It Out". Um login bem-sucedido define o cookie de sessão no seu navegador.
+2. A partir daí, todo outro "Try It Out" nesta página busca automaticamente um cookie CSRF novo em `GET /sanctum/csrf-cookie` e envia seu valor de volta como o header `X-XSRF-TOKEN`, exatamente como o front-end SPA real faz — não é necessário copiar nenhum token manualmente.
+3. `POST /auth/logout` limpa tanto a sessão quanto o token CSRF.
 
-An unauthenticated request to any endpoint that requires a session receives a `401` `application/problem+json` response.
+Uma requisição não autenticada a qualquer endpoint que exige sessão recebe uma resposta `401` `application/problem+json`.
 

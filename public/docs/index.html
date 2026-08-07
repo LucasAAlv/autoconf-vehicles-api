@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Autoconf Vehicles API Documentation</title>
+    <title>Documentação da API Autoconf Vehicles</title>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
@@ -61,8 +61,8 @@
                     <a href="#introduction">Introduction</a>
                 </li>
                                     <ul id="tocify-subheader-introduction" class="tocify-subheader">
-                                                    <li class="tocify-item level-2" data-unique="authentication">
-                                <a href="#authentication">Authentication</a>
+                                                    <li class="tocify-item level-2" data-unique="autenticacao">
+                                <a href="#autenticacao">Autenticação</a>
                             </li>
                                                                         </ul>
                             </ul>
@@ -105,7 +105,7 @@
                                 <a href="#vehicles-GETapi-vehicles--vehicle_id-">Show a single vehicle.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="vehicles-PUTapi-vehicles--vehicle_id-">
-                                <a href="#vehicles-PUTapi-vehicles--vehicle_id-">Update a vehicle</a>
+                                <a href="#vehicles-PUTapi-vehicles--vehicle_id-">Atualizar um veículo</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="vehicles-DELETEapi-vehicles--vehicle_id-">
                                 <a href="#vehicles-DELETEapi-vehicles--vehicle_id-">Delete a vehicle.</a>
@@ -137,7 +137,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: August 6, 2026</li>
+        <li>Last updated: August 7, 2026</li>
     </ul>
 </div>
 
@@ -149,28 +149,28 @@
 <aside>
     <strong>Base URL</strong>: <code>http://localhost:8000</code>
 </aside>
-<p>This documentation covers every endpoint exposed by the Autoconf Vehicles API: authentication, vehicle CRUD, and vehicle image management.</p>
-<aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
-You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
-<h2 id="authentication">Authentication</h2>
-<p>This API is a <strong>Laravel Sanctum SPA</strong> — it is authenticated by an <code>HttpOnly</code> session cookie, not a bearer token. There is no API key to type into these docs. To authenticate from this page:</p>
+<p>Esta documentação cobre todo endpoint exposto pela API Autoconf Vehicles: autenticação, CRUD de veículos e gestão de imagens de veículos.</p>
+<aside>Ao rolar a página, você verá exemplos de código para consumir a API em diferentes linguagens de programação na área escura à direita (ou como parte do conteúdo no celular).
+É possível trocar a linguagem usada pelas abas no canto superior direito (ou pelo menu de navegação no canto superior esquerdo no celular).</aside>
+<h2 id="autenticacao">Autenticação</h2>
+<p>Esta API é uma <strong>SPA Laravel Sanctum</strong> — autenticada por um cookie de sessão <code>HttpOnly</code>, não por um bearer token. Não existe uma API key pra digitar nesta doc. Para se autenticar a partir desta página:</p>
 <ol>
-<li>Call <strong><code>POST /auth/register</code></strong> (or use an existing account) and then <strong><code>POST /auth/login</code></strong> using the "Try It Out" button. A successful login sets the session cookie in your browser.</li>
-<li>From then on, every other "Try It Out" call on this page automatically fetches a fresh CSRF cookie from <code>GET /sanctum/csrf-cookie</code> and sends its value back as the <code>X-XSRF-TOKEN</code> header, exactly like the real front-end SPA does — you don't need to copy any token by hand.</li>
-<li><code>POST /auth/logout</code> clears both the session and the CSRF token.</li>
+<li>Chame <strong><code>POST /auth/register</code></strong> (ou use uma conta existente) e depois <strong><code>POST /auth/login</code></strong> usando o botão "Try It Out". Um login bem-sucedido define o cookie de sessão no seu navegador.</li>
+<li>A partir daí, todo outro "Try It Out" nesta página busca automaticamente um cookie CSRF novo em <code>GET /sanctum/csrf-cookie</code> e envia seu valor de volta como o header <code>X-XSRF-TOKEN</code>, exatamente como o front-end SPA real faz — não é necessário copiar nenhum token manualmente.</li>
+<li><code>POST /auth/logout</code> limpa tanto a sessão quanto o token CSRF.</li>
 </ol>
-<p>An unauthenticated request to any endpoint that requires a session receives a <code>401</code> <code>application/problem+json</code> response.</p>
+<p>Uma requisição não autenticada a qualquer endpoint que exige sessão recebe uma resposta <code>401</code> <code>application/problem+json</code>.</p>
 
         <h1 id="authenticating-requests">Authenticating requests</h1>
-<p>This API is authenticated via a Laravel Sanctum SPA session cookie, not a bearer/header/query token — see the "Authentication" section above for the exact login + CSRF flow to use from these docs.</p>
+<p>Esta API é autenticada via cookie de sessão de uma SPA Laravel Sanctum, não por um bearer/header/query token — veja a seção "Authentication" acima para o fluxo exato de login + CSRF a usar a partir desta documentação.</p>
 
         <h1 id="auth">Auth</h1>
 
-    <p>Registration, login, logout and the current authenticated user. This API is a
-<strong>Sanctum SPA</strong>: a successful <code>login</code> (or <code>register</code> followed by <code>login</code>) sets an
-<code>HttpOnly</code> session cookie, and every subsequent authenticated request must carry a
-valid <code>X-XSRF-TOKEN</code> header sourced from the <code>XSRF-TOKEN</code> cookie handed out by
-<code>GET /sanctum/csrf-cookie</code> — see the "Authentication" section above.</p>
+    <p>Registro, login, logout e o usuário autenticado atual. Esta API é uma <strong>SPA
+Sanctum</strong>: um <code>login</code> bem-sucedido (ou <code>register</code> seguido de <code>login</code>) define um
+cookie de sessão <code>HttpOnly</code>, e toda requisição autenticada subsequente precisa
+carregar um header <code>X-XSRF-TOKEN</code> válido, obtido a partir do cookie <code>XSRF-TOKEN</code>
+entregue por <code>GET /sanctum/csrf-cookie</code> — veja a seção "Authentication" acima.</p>
 
                                 <h2 id="auth-POSTapi-auth-register">Create a new user account.</h2>
 
@@ -250,14 +250,14 @@ fetch(url, {
     &quot;type&quot;: &quot;about:blank&quot;,
     &quot;title&quot;: &quot;Unprocessable Content&quot;,
     &quot;status&quot;: 422,
-    &quot;detail&quot;: &quot;The email has already been taken. (and 1 more error)&quot;,
+    &quot;detail&quot;: &quot;J&aacute; existe uma conta cadastrada com esse e-mail. (and 1 more error)&quot;,
     &quot;instance&quot;: &quot;/api/auth/register&quot;,
     &quot;errors&quot;: {
         &quot;email&quot;: [
-            &quot;The email has already been taken.&quot;
+            &quot;J&aacute; existe uma conta cadastrada com esse e-mail.&quot;
         ],
         &quot;password&quot;: [
-            &quot;The password field confirmation does not match.&quot;
+            &quot;A confirma&ccedil;&atilde;o de senha n&atilde;o corresponde.&quot;
         ]
     }
 }</code>
@@ -459,11 +459,11 @@ fetch(url, {
     &quot;type&quot;: &quot;about:blank&quot;,
     &quot;title&quot;: &quot;Unprocessable Content&quot;,
     &quot;status&quot;: 422,
-    &quot;detail&quot;: &quot;These credentials do not match our records.&quot;,
+    &quot;detail&quot;: &quot;Essas credenciais n&atilde;o correspondem aos nossos registros.&quot;,
     &quot;instance&quot;: &quot;/api/auth/login&quot;,
     &quot;errors&quot;: {
         &quot;email&quot;: [
-            &quot;These credentials do not match our records.&quot;
+            &quot;Essas credenciais n&atilde;o correspondem aos nossos registros.&quot;
         ]
     }
 }</code>
@@ -945,7 +945,7 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 41,
+            &quot;id&quot;: 57,
             &quot;placa&quot;: &quot;NGZ0A00&quot;,
             &quot;chassi&quot;: &quot;MIYVDLJNIKH000000&quot;,
             &quot;marca&quot;: &quot;Chevrolet&quot;,
@@ -956,12 +956,12 @@ fetch(url, {
             &quot;km&quot;: 208376,
             &quot;cambio&quot;: &quot;manual&quot;,
             &quot;combustivel&quot;: &quot;gasolina&quot;,
-            &quot;user_id&quot;: 71,
-            &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+            &quot;user_id&quot;: 99,
+            &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
         },
         {
-            &quot;id&quot;: 42,
+            &quot;id&quot;: 58,
             &quot;placa&quot;: &quot;SIT0A01&quot;,
             &quot;chassi&quot;: &quot;CPSCQLDZSNR000001&quot;,
             &quot;marca&quot;: &quot;Honda&quot;,
@@ -972,9 +972,9 @@ fetch(url, {
             &quot;km&quot;: 138484,
             &quot;cambio&quot;: &quot;automatico&quot;,
             &quot;combustivel&quot;: &quot;diesel&quot;,
-            &quot;user_id&quot;: 72,
-            &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+            &quot;user_id&quot;: 100,
+            &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
         }
     ],
     &quot;links&quot;: {
@@ -1347,7 +1347,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 43,
+        &quot;id&quot;: 59,
         &quot;placa&quot;: &quot;GZM0A02&quot;,
         &quot;chassi&quot;: &quot;IYVDLJNIKHW000002&quot;,
         &quot;marca&quot;: &quot;Ford&quot;,
@@ -1358,19 +1358,19 @@ fetch(url, {
         &quot;km&quot;: 237248,
         &quot;cambio&quot;: &quot;manual&quot;,
         &quot;combustivel&quot;: &quot;gasolina&quot;,
-        &quot;user_id&quot;: 73,
-        &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
+        &quot;user_id&quot;: 101,
+        &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
         &quot;creator&quot;: null,
         &quot;updater&quot;: null,
         &quot;images&quot;: [
             {
-                &quot;id&quot;: 31,
+                &quot;id&quot;: 43,
                 &quot;path&quot;: &quot;vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg&quot;,
                 &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg&quot;,
                 &quot;is_cover&quot;: false,
-                &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-                &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+                &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
             }
         ]
     }
@@ -1657,7 +1657,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 44,
+        &quot;id&quot;: 60,
         &quot;placa&quot;: &quot;NGZ0A03&quot;,
         &quot;chassi&quot;: &quot;MIYVDLJNIKH000003&quot;,
         &quot;marca&quot;: &quot;Chevrolet&quot;,
@@ -1668,19 +1668,19 @@ fetch(url, {
         &quot;km&quot;: 208376,
         &quot;cambio&quot;: &quot;manual&quot;,
         &quot;combustivel&quot;: &quot;gasolina&quot;,
-        &quot;user_id&quot;: 76,
-        &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
+        &quot;user_id&quot;: 104,
+        &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
         &quot;creator&quot;: null,
         &quot;updater&quot;: null,
         &quot;images&quot;: [
             {
-                &quot;id&quot;: 32,
+                &quot;id&quot;: 44,
                 &quot;path&quot;: &quot;vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg&quot;,
                 &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg&quot;,
                 &quot;is_cover&quot;: false,
-                &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-                &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+                &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
             }
         ]
     }
@@ -1799,16 +1799,17 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                     </form>
 
-                    <h2 id="vehicles-PUTapi-vehicles--vehicle_id-">Update a vehicle</h2>
+                    <h2 id="vehicles-PUTapi-vehicles--vehicle_id-">Atualizar um veículo</h2>
 
 <p>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Both <code>PUT</code> and <code>PATCH</code> route here and behave identically: every field in <code>UpdateVehicleRequest</code>
-is <code>sometimes</code>, so an absent field is simply left untouched by <code>fill()</code> rather than nulled out —
-there is no "PUT replaces everything" distinction. <code>updated_by</code> is not set by the controller —
-<code>VehicleObserver</code> stamps it from the authenticated user on the <code>updating</code> event.</p>
+<p><code>PUT</code> e <code>PATCH</code> chegam ambos aqui e se comportam de forma idêntica: todo campo em
+<code>UpdateVehicleRequest</code> é <code>sometimes</code>, então um campo ausente simplesmente permanece
+intocado pelo <code>fill()</code> em vez de ser zerado — não há distinção de "PUT substitui tudo".
+<code>updated_by</code> não é setado pelo controller — <code>VehicleObserver</code> o carimba a partir do
+usuário autenticado no evento <code>updating</code>.</p>
 
 <span id="example-requests-PUTapi-vehicles--vehicle_id-">
 <blockquote>Example request:</blockquote>
@@ -1873,7 +1874,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 45,
+        &quot;id&quot;: 61,
         &quot;placa&quot;: &quot;GZM0A04&quot;,
         &quot;chassi&quot;: &quot;IYVDLJNIKHW000004&quot;,
         &quot;marca&quot;: &quot;Ford&quot;,
@@ -1884,19 +1885,19 @@ fetch(url, {
         &quot;km&quot;: 237248,
         &quot;cambio&quot;: &quot;manual&quot;,
         &quot;combustivel&quot;: &quot;gasolina&quot;,
-        &quot;user_id&quot;: 79,
-        &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
+        &quot;user_id&quot;: 107,
+        &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
         &quot;creator&quot;: null,
         &quot;updater&quot;: null,
         &quot;images&quot;: [
             {
-                &quot;id&quot;: 33,
+                &quot;id&quot;: 45,
                 &quot;path&quot;: &quot;vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg&quot;,
                 &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg&quot;,
                 &quot;is_cover&quot;: false,
-                &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-                &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+                &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
             }
         ]
     }
@@ -2348,7 +2349,7 @@ already gate their own actions: only the vehicle's owner or an
     "http://localhost:8000/api/vehicles/1/images" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
-    --form "files[]=@/tmp/php9rlfk1puvr4p0kdOJjL" </code></pre></div>
+    --form "files[]=@/tmp/phpe3sb6g8vr7tr4pamijI" </code></pre></div>
 
 
 <div class="javascript-example">
@@ -2381,20 +2382,20 @@ fetch(url, {
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: [
         {
-            &quot;id&quot;: 34,
+            &quot;id&quot;: 46,
             &quot;path&quot;: &quot;vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg&quot;,
             &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg&quot;,
             &quot;is_cover&quot;: false,
-            &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+            &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
         },
         {
-            &quot;id&quot;: 35,
+            &quot;id&quot;: 47,
             &quot;path&quot;: &quot;vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg&quot;,
             &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg&quot;,
             &quot;is_cover&quot;: false,
-            &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-            &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+            &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
         }
     ]
 }</code>
@@ -2600,12 +2601,12 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;data&quot;: {
-        &quot;id&quot;: 36,
+        &quot;id&quot;: 48,
         &quot;path&quot;: &quot;vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg&quot;,
         &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg&quot;,
         &quot;is_cover&quot;: false,
-        &quot;created_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;,
-        &quot;updated_at&quot;: &quot;2026-08-06T22:24:39.000000Z&quot;
+        &quot;created_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:32:00.000000Z&quot;
     }
 }</code>
  </pre>

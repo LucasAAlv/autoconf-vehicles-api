@@ -221,7 +221,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":41,"placa":"NGZ0A00","chassi":"MIYVDLJNIKH000000","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":71,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"},{"id":42,"placa":"SIT0A01","chassi":"CPSCQLDZSNR000001","marca":"Honda","modelo":"Corolla","versao":"Titanium","valor_venda":"174593.24","cor":"teal","km":138484,"cambio":"automatico","combustivel":"diesel","user_id":72,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
+        content: '{"data":[{"id":57,"placa":"NGZ0A00","chassi":"MIYVDLJNIKH000000","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":99,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"},{"id":58,"placa":"SIT0A01","chassi":"CPSCQLDZSNR000001","marca":"Honda","modelo":"Corolla","versao":"Titanium","valor_venda":"174593.24","cor":"teal","km":138484,"cambio":"automatico","combustivel":"diesel","user_id":100,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
         headers: []
         description: 'Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.'
       -
@@ -398,7 +398,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":43,"placa":"GZM0A02","chassi":"IYVDLJNIKHW000002","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":73,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":31,"path":"vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        content: '{"data":{"id":59,"placa":"GZM0A02","chassi":"IYVDLJNIKHW000002","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":101,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":43,"path":"vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
         headers: []
         description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.'
       -
@@ -463,7 +463,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":44,"placa":"NGZ0A03","chassi":"MIYVDLJNIKH000003","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":76,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":32,"path":"vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        content: '{"data":{"id":60,"placa":"NGZ0A03","chassi":"MIYVDLJNIKH000003","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":104,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":44,"path":"vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
         headers: []
         description: ''
       -
@@ -495,12 +495,13 @@ endpoints:
       groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Update a vehicle'
+      title: 'Atualizar um veículo'
       description: |-
-        Both `PUT` and `PATCH` route here and behave identically: every field in `UpdateVehicleRequest`
-        is `sometimes`, so an absent field is simply left untouched by `fill()` rather than nulled out —
-        there is no "PUT replaces everything" distinction. `updated_by` is not set by the controller —
-        `VehicleObserver` stamps it from the authenticated user on the `updating` event.
+        `PUT` e `PATCH` chegam ambos aqui e se comportam de forma idêntica: todo campo em
+        `UpdateVehicleRequest` é `sometimes`, então um campo ausente simplesmente permanece
+        intocado pelo `fill()` em vez de ser zerado — não há distinção de "PUT substitui tudo".
+        `updated_by` não é setado pelo controller — `VehicleObserver` o carimba a partir do
+        usuário autenticado no evento `updating`.
       authenticated: true
       deprecated: false
     headers:
@@ -657,7 +658,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":45,"placa":"GZM0A04","chassi":"IYVDLJNIKHW000004","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":79,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z","creator":null,"updater":null,"images":[{"id":33,"path":"vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","is_cover":false,"created_at":"2026-08-06T22:24:39.000000Z","updated_at":"2026-08-06T22:24:39.000000Z"}]}}'
+        content: '{"data":{"id":61,"placa":"GZM0A04","chassi":"IYVDLJNIKHW000004","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":107,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":45,"path":"vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
         headers: []
         description: 'Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).'
       -

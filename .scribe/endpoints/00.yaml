@@ -1,10 +1,10 @@
 name: Auth
 description: |-
-  Registration, login, logout and the current authenticated user. This API is a
-  **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-  `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-  valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-  `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+  Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+  Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+  cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+  carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+  entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
 endpoints:
   -
     custom: []
@@ -15,11 +15,11 @@ endpoints:
       custom: []
       groupName: Auth
       groupDescription: |-
-        Registration, login, logout and the current authenticated user. This API is a
-        **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-        `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-        valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-        `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+        Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+        Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+        cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+        carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+        entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
       title: 'Create a new user account.'
@@ -100,7 +100,7 @@ endpoints:
       -
         custom: []
         status: 422
-        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"The email has already been taken. (and 1 more error)","instance":"\/api\/auth\/register","errors":{"email":["The email has already been taken."],"password":["The password field confirmation does not match."]}}'
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"J\u00e1 existe uma conta cadastrada com esse e-mail. (and 1 more error)","instance":"\/api\/auth\/register","errors":{"email":["J\u00e1 existe uma conta cadastrada com esse e-mail."],"password":["A confirma\u00e7\u00e3o de senha n\u00e3o corresponde."]}}'
         headers: []
         description: 'Payload inválido — e-mail já cadastrado, senha e confirmação não coincidem, ou campo obrigatório ausente.'
     responseFields: []
@@ -117,11 +117,11 @@ endpoints:
       custom: []
       groupName: Auth
       groupDescription: |-
-        Registration, login, logout and the current authenticated user. This API is a
-        **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-        `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-        valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-        `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+        Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+        Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+        cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+        carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+        entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
       title: "Authenticate a user for the SPA's stateful (cookie) session."
@@ -178,7 +178,7 @@ endpoints:
       -
         custom: []
         status: 422
-        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"These credentials do not match our records.","instance":"\/api\/auth\/login","errors":{"email":["These credentials do not match our records."]}}'
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"Essas credenciais n\u00e3o correspondem aos nossos registros.","instance":"\/api\/auth\/login","errors":{"email":["Essas credenciais n\u00e3o correspondem aos nossos registros."]}}'
         headers: []
         description: 'Credenciais inválidas. Mesmo formato `application/problem+json` usado por qualquer outra falha de validação (422).'
     responseFields: []
@@ -195,11 +195,11 @@ endpoints:
       custom: []
       groupName: Auth
       groupDescription: |-
-        Registration, login, logout and the current authenticated user. This API is a
-        **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-        `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-        valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-        `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+        Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+        Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+        cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+        carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+        entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
       title: 'Return the currently authenticated user.'
@@ -247,11 +247,11 @@ endpoints:
       custom: []
       groupName: Auth
       groupDescription: |-
-        Registration, login, logout and the current authenticated user. This API is a
-        **Sanctum SPA**: a successful `login` (or `register` followed by `login`) sets an
-        `HttpOnly` session cookie, and every subsequent authenticated request must carry a
-        valid `X-XSRF-TOKEN` header sourced from the `XSRF-TOKEN` cookie handed out by
-        `GET /sanctum/csrf-cookie` — see the "Authentication" section above.
+        Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA
+        Sanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um
+        cookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa
+        carregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`
+        entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
       title: "End the SPA's authenticated session."

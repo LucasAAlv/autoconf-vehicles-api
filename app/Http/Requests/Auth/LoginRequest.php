@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\Auth\Concerns\HasAuthValidationMessages;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
+    use HasAuthValidationMessages;
+
     /**
      * Anyone may attempt to log in; there is no prior authentication or
      * ownership check to perform here.

@@ -221,12 +221,13 @@ class VehicleController extends Controller
      * authenticated user on the `updating` event.
      */
     #[Endpoint(
-        title: 'Update a vehicle',
+        title: 'Atualizar um veículo',
         description: <<<'DESC'
-            Both `PUT` and `PATCH` route here and behave identically: every field in `UpdateVehicleRequest`
-            is `sometimes`, so an absent field is simply left untouched by `fill()` rather than nulled out —
-            there is no "PUT replaces everything" distinction. `updated_by` is not set by the controller —
-            `VehicleObserver` stamps it from the authenticated user on the `updating` event.
+            `PUT` e `PATCH` chegam ambos aqui e se comportam de forma idêntica: todo campo em
+            `UpdateVehicleRequest` é `sometimes`, então um campo ausente simplesmente permanece
+            intocado pelo `fill()` em vez de ser zerado — não há distinção de "PUT substitui tudo".
+            `updated_by` não é setado pelo controller — `VehicleObserver` o carimba a partir do
+            usuário autenticado no evento `updating`.
             DESC,
     )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
