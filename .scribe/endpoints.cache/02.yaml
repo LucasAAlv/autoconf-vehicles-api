@@ -14,11 +14,11 @@ endpoints:
       groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Upload one or more images for a vehicle.'
+      title: 'Enviar uma ou mais imagens para um veículo'
       description: |-
-        `VehiclePolicy::manageImages` gates this the same way `update`/`delete`
-        already gate their own actions: only the vehicle's owner or an
-        `is_admin` user may add images to it.
+        `VehiclePolicy::manageImages` restringe isto do mesmo jeito que `update`/`delete` já
+        restringem suas próprias ações: só o dono do veículo ou um usuário `is_admin` pode
+        adicionar imagens a ele.
       authenticated: true
       deprecated: false
     headers:
@@ -61,7 +61,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":[{"id":46,"path":"vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"},{"id":47,"path":"vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}'
+        content: '{"data":[{"id":58,"path":"vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"},{"id":59,"path":"vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}]}'
         headers: []
         description: 'Imagens criadas. A primeira imagem já enviada para um veículo é automaticamente marcada como `is_cover`.'
       -
@@ -73,7 +73,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999\/images"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/999\/images"}'
         headers: []
         description: ''
       -
@@ -98,19 +98,17 @@ endpoints:
       groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Set the cover of a vehicle to one of its own images.'
+      title: 'Definir a capa de um veículo'
       description: |-
-        `{imageId}` is resolved manually (`vehicle_id`-scoped query +
-        `findOrFail`) instead of via implicit nested route-model binding:
-        nested binding would need `{vehicle}` and `{image}` to be related
-        through a named Eloquent relationship matching the route segment,
-        whereas here the check that the image actually belongs to this
-        vehicle *is* the interesting behaviour (an image from a different
-        vehicle must 404, not 403), so it is spelled out explicitly.
-        `findOrFail` throws a `ModelNotFoundException`, which the exception
-        handler in `bootstrap/app.php` already rewrites into a 404
-        `application/problem+json` response — nothing extra to do here for
-        either "wrong vehicle" or "no such image".
+        `{imageId}` é resolvido manualmente (query com escopo por `vehicle_id` + `findOrFail`)
+        em vez de nested route-model binding implícito: o binding aninhado precisaria que
+        `{vehicle}` e `{image}` estivessem relacionados por um relationship Eloquent nomeado
+        batendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente
+        checar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar
+        404, não 403), então isso fica explícito. `findOrFail` lança `ModelNotFoundException`,
+        que o exception handler em `bootstrap/app.php` já reescreve como 404
+        `application/problem+json` — nada extra é necessário aqui, seja pra "veículo errado"
+        ou "imagem inexistente".
       authenticated: true
       deprecated: false
     headers:
@@ -151,7 +149,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":48,"path":"vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}}'
+        content: '{"data":{"id":60,"path":"vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","is_cover":false,"created_at":"2026-08-07T01:44:54.000000Z","updated_at":"2026-08-07T01:44:54.000000Z"}}'
         headers: []
         description: 'Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste veículo deixa de sê-lo, de forma transacional.'
       -
@@ -163,7 +161,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/1\/images\/999\/cover"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/1\/images\/999\/cover"}'
         headers: []
         description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
     responseFields: []
@@ -182,14 +180,12 @@ endpoints:
       groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Delete a single image belonging to a vehicle.'
+      title: 'Excluir uma imagem de um veículo'
       description: |-
-        The image is looked up through `$vehicle->images()` rather than a
-        global `VehicleImage::findOrFail()` (or implicit route-model binding
-        on `{imageId}`): this guarantees an image belonging to a different
-        vehicle 404s exactly like one that doesn't exist at all, instead of
-        leaking a 403 (or succeeding) for an id that is real but not "this
-        vehicle's".
+        A imagem é buscada através de `$vehicle->images()` em vez de um `VehicleImage::findOrFail()`
+        global (ou binding implícito de rota em `{imageId}`): isso garante que uma imagem
+        pertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de
+        vazar um 403 (ou ter sucesso) para um id que é real mas não é "deste veículo".
       authenticated: true
       deprecated: false
     headers:
@@ -242,7 +238,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/1\/images\/999"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/1\/images\/999"}'
         headers: []
         description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
     responseFields: []

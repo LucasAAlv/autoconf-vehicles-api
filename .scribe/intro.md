@@ -1,9 +1,9 @@
-# Introduction
+# Introdução
 
 API para um SaaS multiusuário de gestão de veículos: autenticação, cadastro de veículos e gestão de imagens com capa única.
 
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost:8000</code>
+    <strong>URL base</strong>: <code>http://localhost:8000</code>
 </aside>
 
 Esta documentação cobre todo endpoint exposto pela API Autoconf Vehicles: autenticação, CRUD de veículos e gestão de imagens de veículos.

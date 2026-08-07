@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Knuckles\Scribe\Attributes\Authenticated;
 use Knuckles\Scribe\Attributes\BodyParam;
+use Knuckles\Scribe\Attributes\Endpoint;
 use Knuckles\Scribe\Attributes\Group;
 use Knuckles\Scribe\Attributes\Response as ResponseExample;
 use Knuckles\Scribe\Attributes\Unauthenticated;
@@ -39,6 +40,16 @@ class AuthController extends Controller
      * that also sends `is_admin` (or any other attribute) has no way to
      * influence the created record.
      */
+    #[Endpoint(
+        title: 'Criar uma nova conta de usuário',
+        description: <<<'DESC'
+            Isso não inicia também uma sessão autenticada: registro e login são mantidos como dois
+            passos separados e explícitos, seguindo o contrato simples que `POST /auth/register`
+            promete. `User::create()` só recebe os campos já validados da requisição, então um
+            payload que também envie `is_admin` (ou qualquer outro atributo) não tem como
+            influenciar o registro criado.
+            DESC,
+    )]
     #[Unauthenticated]
     #[BodyParam('name', 'string', 'Nome completo do usuário.', example: 'Maria Souza')]
     #[BodyParam('email', 'string', 'E-mail único do usuário.', example: 'maria.souza@example.com')]
@@ -83,6 +94,17 @@ class AuthController extends Controller
      * looks identical to any other validation failure to API consumers
      * without the controller having to build that response by hand.
      */
+    #[Endpoint(
+        title: 'Autenticar um usuário para a sessão stateful da SPA',
+        description: <<<'DESC'
+            `ValidationException::withMessages()` numa tentativa malsucedida é deliberado, não só
+            conveniente: o exception renderer desta aplicação já transforma qualquer
+            `ValidationException` no mesmo envelope `application/problem+json` 422 usado pela
+            validação de Form Request, então uma falha de credenciais parece idêntica a qualquer
+            outra falha de validação para quem consome a API, sem o controller precisar montar
+            essa resposta manualmente.
+            DESC,
+    )]
     #[Unauthenticated]
     #[BodyParam('email', 'string', 'E-mail cadastrado.', example: 'maria.souza@example.com')]
     #[BodyParam('password', 'string', 'Senha da conta.', example: 'Str0ng!Passw0rd')]
@@ -127,6 +149,15 @@ class AuthController extends Controller
      * first, which the app's exception renderer already turns into a
      * problem+json 401 (wired in `bootstrap/app.php`).
      */
+    #[Endpoint(
+        title: 'Retornar o usuário autenticado atual',
+        description: <<<'DESC'
+            Esta rota fica atrás de `auth:sanctum`, então um visitante não autenticado nunca chega
+            a este método: o próprio guard do Sanctum lança `AuthenticationException` antes, que o
+            exception renderer da aplicação já transforma num 401 `application/problem+json`
+            (configurado em `bootstrap/app.php`).
+            DESC,
+    )]
     #[Authenticated]
     #[ResponseExample(status: 200, content: [
         'id' => 1,
@@ -157,6 +188,16 @@ class AuthController extends Controller
      * used rather than `200` because there is no representation to return
      * for a logout.
      */
+    #[Endpoint(
+        title: 'Encerrar a sessão autenticada da SPA',
+        description: <<<'DESC'
+            Os três passos espelham o cuidado que `login()` já tem com sessões, na ordem inversa:
+            desloga o guard, destrói os dados da sessão e gira o token CSRF, então nem o id de
+            sessão nem o token CSRF que um atacante tenha observado antes do logout continuam
+            válidos depois. `204 No Content` é usado em vez de `200` porque não há representação
+            alguma pra devolver num logout.
+            DESC,
+    )]
     #[Authenticated]
     #[ResponseExample(status: 204, content: '', description: 'Sessão, dados de sessão e token CSRF invalidados com sucesso.')]
     #[ResponseExample(status: 401, content: [

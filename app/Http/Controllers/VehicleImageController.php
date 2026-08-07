@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Knuckles\Scribe\Attributes\Authenticated;
 use Knuckles\Scribe\Attributes\BodyParam;
+use Knuckles\Scribe\Attributes\Endpoint;
 use Knuckles\Scribe\Attributes\Group;
 use Knuckles\Scribe\Attributes\Response as ResponseExample;
 use Knuckles\Scribe\Attributes\ResponseFromApiResource;
@@ -34,6 +35,14 @@ class VehicleImageController extends Controller
      * already gate their own actions: only the vehicle's owner or an
      * `is_admin` user may add images to it.
      */
+    #[Endpoint(
+        title: 'Enviar uma ou mais imagens para um veículo',
+        description: <<<'DESC'
+            `VehiclePolicy::manageImages` restringe isto do mesmo jeito que `update`/`delete` já
+            restringem suas próprias ações: só o dono do veículo ou um usuário `is_admin` pode
+            adicionar imagens a ele.
+            DESC,
+    )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
     #[BodyParam('files', 'file[]', 'Um ou mais arquivos de imagem (jpeg, jpg, png, gif ou webp; até 2MB cada). Enviado como multipart/form-data.', required: true)]
     #[ResponseFromApiResource(
@@ -64,7 +73,7 @@ class VehicleImageController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/999/images',
     ])]
     public function store(StoreVehicleImageRequest $request, Vehicle $vehicle): JsonResponse
@@ -93,6 +102,20 @@ class VehicleImageController extends Controller
      * `application/problem+json` response — nothing extra to do here for
      * either "wrong vehicle" or "no such image".
      */
+    #[Endpoint(
+        title: 'Definir a capa de um veículo',
+        description: <<<'DESC'
+            `{imageId}` é resolvido manualmente (query com escopo por `vehicle_id` + `findOrFail`)
+            em vez de nested route-model binding implícito: o binding aninhado precisaria que
+            `{vehicle}` e `{image}` estivessem relacionados por um relationship Eloquent nomeado
+            batendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente
+            checar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar
+            404, não 403), então isso fica explícito. `findOrFail` lança `ModelNotFoundException`,
+            que o exception handler em `bootstrap/app.php` já reescreve como 404
+            `application/problem+json` — nada extra é necessário aqui, seja pra "veículo errado"
+            ou "imagem inexistente".
+            DESC,
+    )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
     #[UrlParam('imageId', 'integer', 'Id da imagem (deve pertencer ao veículo informado).', example: 1)]
     #[ResponseFromApiResource(
@@ -111,7 +134,7 @@ class VehicleImageController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/1/images/999/cover',
     ], description: 'Também retornado quando a imagem existe mas pertence a outro veículo.')]
     public function setCover(Vehicle $vehicle, int $imageId): VehicleImageResource
@@ -137,6 +160,15 @@ class VehicleImageController extends Controller
      * leaking a 403 (or succeeding) for an id that is real but not "this
      * vehicle's".
      */
+    #[Endpoint(
+        title: 'Excluir uma imagem de um veículo',
+        description: <<<'DESC'
+            A imagem é buscada através de `$vehicle->images()` em vez de um `VehicleImage::findOrFail()`
+            global (ou binding implícito de rota em `{imageId}`): isso garante que uma imagem
+            pertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de
+            vazar um 403 (ou ter sucesso) para um id que é real mas não é "deste veículo".
+            DESC,
+    )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
     #[UrlParam('imageId', 'integer', 'Id da imagem (deve pertencer ao veículo informado).', example: 1)]
     #[ResponseExample(status: 204, content: '', description: 'Imagem excluída do banco e o arquivo físico removido do storage.')]
@@ -151,7 +183,7 @@ class VehicleImageController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/1/images/999',
     ], description: 'Também retornado quando a imagem existe mas pertence a outro veículo.')]
     public function destroy(Vehicle $vehicle, string $imageId): Response

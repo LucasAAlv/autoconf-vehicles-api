@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 it('returns a generic problem+json 404 for an unmatched route', function () {
     $response = $this->getJson('/api/this-route-does-not-exist');
 
-    $response->assertProblemJson(status: 404, detail: 'The requested resource was not found.');
+    $response->assertProblemJson(status: 404, detail: 'O recurso solicitado não foi encontrado.');
 });
 
 it('returns a generic problem+json 404 for a real model-not-found, without leaking the model class or id', function () {
@@ -19,7 +19,7 @@ it('returns a generic problem+json 404 for a real model-not-found, without leaki
 
     $response = $this->getJson('/__test/model-not-found');
 
-    $response->assertProblemJson(status: 404, detail: 'The requested resource was not found.');
+    $response->assertProblemJson(status: 404, detail: 'O recurso solicitado não foi encontrado.');
     $response->assertDontSee('App\Models\User', escape: false);
     $response->assertDontSee('999999', escape: false);
 });

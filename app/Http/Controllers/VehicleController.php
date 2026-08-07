@@ -73,6 +73,16 @@ class VehicleController extends Controller
      * `creator`/`updater`/`images`, so those keys are absent from each item here —
      * fetch `GET /vehicles/{vehicle}` for the full shape.
      */
+    #[Endpoint(
+        title: 'Listar veículos, paginado',
+        description: <<<'DESC'
+            `VehiclePolicy::viewAny` já permite qualquer usuário autenticado, então isto lista
+            todos os veículos do sistema, não só os do próprio usuário — consistente com `show()`,
+            que também não restringe por posse. Ao contrário de `show()`/`store()`/`update()`, esta
+            listagem nunca carrega `creator`/`updater`/`images` — busque `GET /vehicles/{vehicle}`
+            para o formato completo.
+            DESC,
+    )]
     #[QueryParam('q', 'string', 'Busca livre (placa, chassi, marca, modelo ou versão).', required: false, example: 'Corolla')]
     #[QueryParam('marca', 'string', 'Filtra por marca exata.', required: false, example: 'Toyota')]
     #[QueryParam('modelo', 'string', 'Filtra por modelo exato.', required: false, example: 'Corolla')]
@@ -122,6 +132,16 @@ class VehicleController extends Controller
      * line of defense). `created_by`/`updated_by` are stamped separately by
      * `VehicleObserver` on the `creating` event.
      */
+    #[Endpoint(
+        title: 'Criar um novo veículo',
+        description: <<<'DESC'
+            `user_id` não faz parte de `$request->validated()` — não é sequer um dado validado, é
+            atribuído diretamente a partir do usuário autenticado, então um cliente nunca consegue
+            influenciá-lo incluindo-o no payload (`Vehicle::$fillable` também o exclui, como
+            segunda linha de defesa). `created_by`/`updated_by` são carimbados separadamente pelo
+            `VehicleObserver` no evento `creating`.
+            DESC,
+    )]
     #[BodyParam('placa', 'string', 'Placa única (formato Mercosul ou tradicional).', example: 'ABC1D23')]
     #[BodyParam('chassi', 'string', 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).', example: '9BWZZZ377VT004251')]
     #[BodyParam('marca', 'string', 'Marca do veículo.', example: 'Toyota')]
@@ -139,11 +159,13 @@ class VehicleController extends Controller
         with: ['creator', 'updater', 'images'],
         description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.',
     )]
+    // The "(and 1 more error)" suffix is Laravel's own `ValidationException`
+    // message format — see the same note on `AuthController::register()`.
     #[ResponseExample(status: 422, content: [
         'type' => 'about:blank',
         'title' => 'Unprocessable Content',
         'status' => 422,
-        'detail' => 'The placa has already been taken. (and 1 more error)',
+        'detail' => 'Já existe um veículo cadastrado com essa placa. (and 1 more error)',
         'instance' => '/api/vehicles',
         'errors' => [
             'placa' => ['Já existe um veículo cadastrado com essa placa.'],
@@ -182,6 +204,14 @@ class VehicleController extends Controller
      * wired in now so a later issue that tightens the policy doesn't need
      * to touch this controller.
      */
+    #[Endpoint(
+        title: 'Exibir um único veículo',
+        description: <<<'DESC'
+            `VehiclePolicy::view` hoje permite qualquer usuário autenticado independentemente da
+            posse, então esta chamada sempre passa trivialmente — já está conectada agora para que
+            uma issue futura que restrinja a policy não precise tocar neste controller.
+            DESC,
+    )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
     #[ResponseFromApiResource(
         VehicleResource::class,
@@ -192,7 +222,7 @@ class VehicleController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/999',
     ])]
     #[ResponseExample(status: 401, content: [
@@ -268,7 +298,7 @@ class VehicleController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/999',
     ])]
     public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
@@ -294,6 +324,17 @@ class VehicleController extends Controller
      * (deferred to after the commit, so a rollback never leaves the vehicle
      * gone but its images' files still on disk, or vice versa).
      */
+    #[Endpoint(
+        title: 'Excluir um veículo',
+        description: <<<'DESC'
+            `vehicle_images.vehicle_id` é `cascadeOnDelete()` a nível de PostgreSQL puro, então as
+            linhas de `VehicleImage` somem automaticamente junto com o veículo — mas esse cascade
+            nunca dispara um evento Eloquent, então `VehicleImageService::deleteAllForVehicle()` é
+            chamado, dentro da mesma transação, para também limpar os arquivos físicos do disco
+            público (adiado até depois do commit, para um rollback nunca deixar o veículo
+            removido mas seus arquivos de imagem ainda no disco, ou vice-versa).
+            DESC,
+    )]
     #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
     #[ResponseExample(status: 204, content: '', description: 'Veículo (e suas imagens, no banco e no storage) excluído com sucesso.')]
     #[ResponseExample(status: 403, content: [
@@ -307,7 +348,7 @@ class VehicleController extends Controller
         'type' => 'about:blank',
         'title' => 'Not Found',
         'status' => 404,
-        'detail' => 'The requested resource was not found.',
+        'detail' => 'O recurso solicitado não foi encontrado.',
         'instance' => '/api/vehicles/999',
     ])]
     public function destroy(Vehicle $vehicle): Response

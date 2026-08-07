@@ -24,14 +24,13 @@ endpoints:
         entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Create a new user account.'
+      title: 'Criar uma nova conta de usuário'
       description: |-
-        This does not also start an authenticated session: registration and
-        login are kept as two separate, explicit steps, matching the plain
-        `POST /auth/register` contract this endpoint promises. `User::create()`
-        only ever receives the request's own validated fields, so a payload
-        that also sends `is_admin` (or any other attribute) has no way to
-        influence the created record.
+        Isso não inicia também uma sessão autenticada: registro e login são mantidos como dois
+        passos separados e explícitos, seguindo o contrato simples que `POST /auth/register`
+        promete. `User::create()` só recebe os campos já validados da requisição, então um
+        payload que também envie `is_admin` (ou qualquer outro atributo) não tem como
+        influenciar o registro criado.
       authenticated: false
       deprecated: false
     headers:
@@ -126,14 +125,14 @@ endpoints:
         entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
-      title: "Authenticate a user for the SPA's stateful (cookie) session."
+      title: 'Autenticar um usuário para a sessão stateful da SPA'
       description: |-
-        `ValidationException::withMessages()` on a bad attempt is deliberate,
-        not just convenient: this app's exception renderer already turns any
-        `ValidationException` into the same `application/problem+json` 422
-        envelope used by Form Request validation, so a credentials failure
-        looks identical to any other validation failure to API consumers
-        without the controller having to build that response by hand.
+        `ValidationException::withMessages()` numa tentativa malsucedida é deliberado, não só
+        conveniente: o exception renderer desta aplicação já transforma qualquer
+        `ValidationException` no mesmo envelope `application/problem+json` 422 usado pela
+        validação de Form Request, então uma falha de credenciais parece idêntica a qualquer
+        outra falha de validação para quem consome a API, sem o controller precisar montar
+        essa resposta manualmente.
       authenticated: false
       deprecated: false
     headers:
@@ -204,12 +203,12 @@ endpoints:
         entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Return the currently authenticated user.'
+      title: 'Retornar o usuário autenticado atual'
       description: |-
-        This route sits behind `auth:sanctum`, so a guest never reaches this
-        method at all: Sanctum's own guard throws `AuthenticationException`
-        first, which the app's exception renderer already turns into a
-        problem+json 401 (wired in `bootstrap/app.php`).
+        Esta rota fica atrás de `auth:sanctum`, então um visitante não autenticado nunca chega
+        a este método: o próprio guard do Sanctum lança `AuthenticationException` antes, que o
+        exception renderer da aplicação já transforma num 401 `application/problem+json`
+        (configurado em `bootstrap/app.php`).
       authenticated: true
       deprecated: false
     headers:
@@ -256,14 +255,13 @@ endpoints:
         entregue por `GET /sanctum/csrf-cookie` — veja a seção "Authentication" acima.
       subgroup: ''
       subgroupDescription: ''
-      title: "End the SPA's authenticated session."
+      title: 'Encerrar a sessão autenticada da SPA'
       description: |-
-        The three steps mirror `login()`'s own care around sessions, in
-        reverse: log the guard out, destroy the session data, and rotate the
-        CSRF token, so neither the session id nor the CSRF token an attacker
-        observed before logout stays valid afterwards. `204 No Content` is
-        used rather than `200` because there is no representation to return
-        for a logout.
+        Os três passos espelham o cuidado que `login()` já tem com sessões, na ordem inversa:
+        desloga o guard, destrói os dados da sessão e gira o token CSRF, então nem o id de
+        sessão nem o token CSRF que um atacante tenha observado antes do logout continuam
+        válidos depois. `204 No Content` é usado em vez de `200` porque não há representação
+        alguma pra devolver num logout.
       authenticated: true
       deprecated: false
     headers:

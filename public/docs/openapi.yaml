@@ -15,9 +15,9 @@ tags:
 paths:
   /api/auth/register:
     post:
-      summary: 'Create a new user account.'
-      operationId: createANewUserAccount
-      description: "This does not also start an authenticated session: registration and\nlogin are kept as two separate, explicit steps, matching the plain\n`POST /auth/register` contract this endpoint promises. `User::create()`\nonly ever receives the request's own validated fields, so a payload\nthat also sends `is_admin` (or any other attribute) has no way to\ninfluence the created record."
+      summary: 'Criar uma nova conta de usuário'
+      operationId: criarUmaNovaContaDeUsurio
+      description: "Isso não inicia também uma sessão autenticada: registro e login são mantidos como dois\npassos separados e explícitos, seguindo o contrato simples que `POST /auth/register`\npromete. `User::create()` só recebe os campos já validados da requisição, então um\npayload que também envie `is_admin` (ou qualquer outro atributo) não tem como\ninfluenciar o registro criado."
       parameters: []
       responses:
         201:
@@ -129,9 +129,9 @@ paths:
       security: []
   /api/auth/login:
     post:
-      summary: "Authenticate a user for the SPA's stateful (cookie) session."
-      operationId: authenticateAUserForTheSPAsStatefulcookieSession
-      description: "`ValidationException::withMessages()` on a bad attempt is deliberate,\nnot just convenient: this app's exception renderer already turns any\n`ValidationException` into the same `application/problem+json` 422\nenvelope used by Form Request validation, so a credentials failure\nlooks identical to any other validation failure to API consumers\nwithout the controller having to build that response by hand."
+      summary: 'Autenticar um usuário para a sessão stateful da SPA'
+      operationId: autenticarUmUsurioParaASessoStatefulDaSPA
+      description: "`ValidationException::withMessages()` numa tentativa malsucedida é deliberado, não só\nconveniente: o exception renderer desta aplicação já transforma qualquer\n`ValidationException` no mesmo envelope `application/problem+json` 422 usado pela\nvalidação de Form Request, então uma falha de credenciais parece idêntica a qualquer\noutra falha de validação para quem consome a API, sem o controller precisar montar\nessa resposta manualmente."
       parameters: []
       responses:
         200:
@@ -225,9 +225,9 @@ paths:
       security: []
   /api/auth/me:
     get:
-      summary: 'Return the currently authenticated user.'
-      operationId: returnTheCurrentlyAuthenticatedUser
-      description: "This route sits behind `auth:sanctum`, so a guest never reaches this\nmethod at all: Sanctum's own guard throws `AuthenticationException`\nfirst, which the app's exception renderer already turns into a\nproblem+json 401 (wired in `bootstrap/app.php`)."
+      summary: 'Retornar o usuário autenticado atual'
+      operationId: retornarOUsurioAutenticadoAtual
+      description: "Esta rota fica atrás de `auth:sanctum`, então um visitante não autenticado nunca chega\na este método: o próprio guard do Sanctum lança `AuthenticationException` antes, que o\nexception renderer da aplicação já transforma num 401 `application/problem+json`\n(configurado em `bootstrap/app.php`)."
       parameters: []
       responses:
         200:
@@ -290,9 +290,9 @@ paths:
         - Auth
   /api/auth/logout:
     post:
-      summary: "End the SPA's authenticated session."
-      operationId: endTheSPAsAuthenticatedSession
-      description: "The three steps mirror `login()`'s own care around sessions, in\nreverse: log the guard out, destroy the session data, and rotate the\nCSRF token, so neither the session id nor the CSRF token an attacker\nobserved before logout stays valid afterwards. `204 No Content` is\nused rather than `200` because there is no representation to return\nfor a logout."
+      summary: 'Encerrar a sessão autenticada da SPA'
+      operationId: encerrarASessoAutenticadaDaSPA
+      description: "Os três passos espelham o cuidado que `login()` já tem com sessões, na ordem inversa:\ndesloga o guard, destrói os dados da sessão e gira o token CSRF, então nem o id de\nsessão nem o token CSRF que um atacante tenha observado antes do logout continuam\nválidos depois. `204 No Content` é usado em vez de `200` porque não há representação\nalguma pra devolver num logout."
       parameters: []
       responses:
         204:
@@ -334,9 +334,9 @@ paths:
         - Auth
   /api/vehicles:
     get:
-      summary: 'List vehicles, paginated.'
-      operationId: listVehiclesPaginated
-      description: "`VehiclePolicy::viewAny` already allows any authenticated user, so\nthis lists every vehicle in the system, not just the caller's own —\nconsistent with `show()`, which likewise doesn't gate on ownership.\n\n`Vehicle::query()` is ordered by `id` (so pagination is deterministic)\nand paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to\n`Vehicle::scopeFilter()` (issue #30) so this method stays a thin\npass-through of the validated input; sorting (issue #31) extends this\nsame query rather than replacing it, via `Vehicle::scopeSort()`, and is\nchained *before* the trailing `orderBy('id')` so the requested fields\ntake precedence and `id` only breaks ties among rows equal on all of\nthem.\n\n`per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a\nclient asking for an unbounded page size just gets the cap back.\n`VehicleResource::collection()` on a paginator carries `total`,\n`current_page`, `last_page` and `per_page` through automatically in\nthe response's `meta` envelope, so no custom collection class is\nneeded to satisfy those fields.\n\nNote: unlike `show()`/`store()`/`update()`, this list view never eager-loads\n`creator`/`updater`/`images`, so those keys are absent from each item here —\nfetch `GET /vehicles/{vehicle}` for the full shape."
+      summary: 'Listar veículos, paginado'
+      operationId: listarVeculosPaginado
+      description: "`VehiclePolicy::viewAny` já permite qualquer usuário autenticado, então isto lista\ntodos os veículos do sistema, não só os do próprio usuário — consistente com `show()`,\nque também não restringe por posse. Ao contrário de `show()`/`store()`/`update()`, esta\nlistagem nunca carrega `creator`/`updater`/`images` — busque `GET /vehicles/{vehicle}`\npara o formato completo."
       parameters:
         -
           in: query
@@ -418,7 +418,7 @@ paths:
                 example:
                   data:
                     -
-                      id: 57
+                      id: 73
                       placa: NGZ0A00
                       chassi: MIYVDLJNIKH000000
                       marca: Chevrolet
@@ -429,11 +429,11 @@ paths:
                       km: 208376
                       cambio: manual
                       combustivel: gasolina
-                      user_id: 99
-                      created_at: '2026-08-07T01:32:00.000000Z'
-                      updated_at: '2026-08-07T01:32:00.000000Z'
+                      user_id: 127
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
                     -
-                      id: 58
+                      id: 74
                       placa: SIT0A01
                       chassi: CPSCQLDZSNR000001
                       marca: Honda
@@ -444,9 +444,9 @@ paths:
                       km: 138484
                       cambio: automatico
                       combustivel: diesel
-                      user_id: 100
-                      created_at: '2026-08-07T01:32:00.000000Z'
-                      updated_at: '2026-08-07T01:32:00.000000Z'
+                      user_id: 128
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
                   links:
                     first: '/?page=1'
                     last: '/?page=1'
@@ -480,7 +480,7 @@ paths:
                   data:
                     type: array
                     example:
-                      - id: 57
+                      - id: 73
                         placa: NGZ0A00
                         chassi: MIYVDLJNIKH000000
                         marca: Chevrolet
@@ -491,10 +491,10 @@ paths:
                         km: 208376
                         cambio: manual
                         combustivel: gasolina
-                        user_id: 99
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
-                      - id: 58
+                        user_id: 127
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                      - id: 74
                         placa: SIT0A01
                         chassi: CPSCQLDZSNR000001
                         marca: Honda
@@ -505,15 +505,15 @@ paths:
                         km: 138484
                         cambio: automatico
                         combustivel: diesel
-                        user_id: 100
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
+                        user_id: 128
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
                     items:
                       type: object
                       properties:
                         id:
                           type: integer
-                          example: 57
+                          example: 73
                         placa:
                           type: string
                           example: NGZ0A00
@@ -546,13 +546,13 @@ paths:
                           example: gasolina
                         user_id:
                           type: integer
-                          example: 99
+                          example: 127
                         created_at:
                           type: string
-                          example: '2026-08-07T01:32:00.000000Z'
+                          example: '2026-08-07T01:44:53.000000Z'
                         updated_at:
                           type: string
-                          example: '2026-08-07T01:32:00.000000Z'
+                          example: '2026-08-07T01:44:53.000000Z'
                   links:
                     type: object
                     properties:
@@ -692,9 +692,9 @@ paths:
                   description: ''
                   example: architecto
     post:
-      summary: 'Create a new vehicle owned by the authenticated user.'
-      operationId: createANewVehicleOwnedByTheAuthenticatedUser
-      description: "`user_id` is not part of `$request->validated()` — it is not\nvalidated input at all, it is assigned directly from the\nauthenticated user, so a client can never influence it by including\nit in the payload (`Vehicle::$fillable` also excludes it, as a second\nline of defense). `created_by`/`updated_by` are stamped separately by\n`VehicleObserver` on the `creating` event."
+      summary: 'Criar um novo veículo'
+      operationId: criarUmNovoVeculo
+      description: "`user_id` não faz parte de `$request->validated()` — não é sequer um dado validado, é\natribuído diretamente a partir do usuário autenticado, então um cliente nunca consegue\ninfluenciá-lo incluindo-o no payload (`Vehicle::$fillable` também o exclui, como\nsegunda linha de defesa). `created_by`/`updated_by` são carimbados separadamente pelo\n`VehicleObserver` no evento `creating`."
       parameters: []
       responses:
         201:
@@ -705,7 +705,7 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 59
+                    id: 75
                     placa: GZM0A02
                     chassi: IYVDLJNIKHW000002
                     marca: Ford
@@ -716,26 +716,26 @@ paths:
                     km: 237248
                     cambio: manual
                     combustivel: gasolina
-                    user_id: 101
-                    created_at: '2026-08-07T01:32:00.000000Z'
-                    updated_at: '2026-08-07T01:32:00.000000Z'
+                    user_id: 129
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
                     creator: null
                     updater: null
                     images:
                       -
-                        id: 43
+                        id: 55
                         path: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
                         url: 'http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg'
                         is_cover: false
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 59
+                        example: 75
                       placa:
                         type: string
                         example: GZM0A02
@@ -768,13 +768,13 @@ paths:
                         example: gasolina
                       user_id:
                         type: integer
-                        example: 101
+                        example: 129
                       created_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       updated_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       creator:
                         type: string
                         example: null
@@ -786,18 +786,18 @@ paths:
                       images:
                         type: array
                         example:
-                          - id: 43
+                          - id: 55
                             path: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
                             url: 'http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg'
                             is_cover: false
-                            created_at: '2026-08-07T01:32:00.000000Z'
-                            updated_at: '2026-08-07T01:32:00.000000Z'
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
                         items:
                           type: object
                           properties:
                             id:
                               type: integer
-                              example: 43
+                              example: 55
                             path:
                               type: string
                               example: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
@@ -809,10 +809,10 @@ paths:
                               example: false
                             created_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
                             updated_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
         401:
           description: ''
           content:
@@ -851,7 +851,7 @@ paths:
                   type: 'about:blank'
                   title: 'Unprocessable Content'
                   status: 422
-                  detail: 'The placa has already been taken. (and 1 more error)'
+                  detail: 'Já existe um veículo cadastrado com essa placa. (and 1 more error)'
                   instance: /api/vehicles
                   errors:
                     placa:
@@ -870,7 +870,7 @@ paths:
                     example: 422
                   detail:
                     type: string
-                    example: 'The placa has already been taken. (and 1 more error)'
+                    example: 'Já existe um veículo cadastrado com essa placa. (and 1 more error)'
                   instance:
                     type: string
                     example: /api/vehicles
@@ -961,9 +961,9 @@ paths:
                 - combustivel
   '/api/vehicles/{vehicle_id}':
     get:
-      summary: 'Show a single vehicle.'
-      operationId: showASingleVehicle
-      description: "`VehiclePolicy::view` currently allows any authenticated user\nregardless of ownership, so this call trivially passes today — it is\nwired in now so a later issue that tightens the policy doesn't need\nto touch this controller."
+      summary: 'Exibir um único veículo'
+      operationId: exibirUmnicoVeculo
+      description: "`VehiclePolicy::view` hoje permite qualquer usuário autenticado independentemente da\nposse, então esta chamada sempre passa trivialmente — já está conectada agora para que\numa issue futura que restrinja a policy não precise tocar neste controller."
       parameters: []
       responses:
         200:
@@ -974,7 +974,7 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 60
+                    id: 76
                     placa: NGZ0A03
                     chassi: MIYVDLJNIKH000003
                     marca: Chevrolet
@@ -985,26 +985,26 @@ paths:
                     km: 208376
                     cambio: manual
                     combustivel: gasolina
-                    user_id: 104
-                    created_at: '2026-08-07T01:32:00.000000Z'
-                    updated_at: '2026-08-07T01:32:00.000000Z'
+                    user_id: 132
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
                     creator: null
                     updater: null
                     images:
                       -
-                        id: 44
+                        id: 56
                         path: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
                         url: 'http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg'
                         is_cover: false
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 60
+                        example: 76
                       placa:
                         type: string
                         example: NGZ0A03
@@ -1037,13 +1037,13 @@ paths:
                         example: gasolina
                       user_id:
                         type: integer
-                        example: 104
+                        example: 132
                       created_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       updated_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       creator:
                         type: string
                         example: null
@@ -1055,18 +1055,18 @@ paths:
                       images:
                         type: array
                         example:
-                          - id: 44
+                          - id: 56
                             path: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
                             url: 'http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg'
                             is_cover: false
-                            created_at: '2026-08-07T01:32:00.000000Z'
-                            updated_at: '2026-08-07T01:32:00.000000Z'
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
                         items:
                           type: object
                           properties:
                             id:
                               type: integer
-                              example: 44
+                              example: 56
                             path:
                               type: string
                               example: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
@@ -1078,10 +1078,10 @@ paths:
                               example: false
                             created_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
                             updated_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
         401:
           description: ''
           content:
@@ -1120,7 +1120,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/999
                 properties:
                   type:
@@ -1134,7 +1134,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/999
@@ -1154,7 +1154,7 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 61
+                    id: 77
                     placa: GZM0A04
                     chassi: IYVDLJNIKHW000004
                     marca: Ford
@@ -1165,26 +1165,26 @@ paths:
                     km: 237248
                     cambio: manual
                     combustivel: gasolina
-                    user_id: 107
-                    created_at: '2026-08-07T01:32:00.000000Z'
-                    updated_at: '2026-08-07T01:32:00.000000Z'
+                    user_id: 135
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
                     creator: null
                     updater: null
                     images:
                       -
-                        id: 45
+                        id: 57
                         path: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
                         url: 'http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg'
                         is_cover: false
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 61
+                        example: 77
                       placa:
                         type: string
                         example: GZM0A04
@@ -1217,13 +1217,13 @@ paths:
                         example: gasolina
                       user_id:
                         type: integer
-                        example: 107
+                        example: 135
                       created_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       updated_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:53.000000Z'
                       creator:
                         type: string
                         example: null
@@ -1235,18 +1235,18 @@ paths:
                       images:
                         type: array
                         example:
-                          - id: 45
+                          - id: 57
                             path: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
                             url: 'http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg'
                             is_cover: false
-                            created_at: '2026-08-07T01:32:00.000000Z'
-                            updated_at: '2026-08-07T01:32:00.000000Z'
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
                         items:
                           type: object
                           properties:
                             id:
                               type: integer
-                              example: 45
+                              example: 57
                             path:
                               type: string
                               example: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
@@ -1258,10 +1258,10 @@ paths:
                               example: false
                             created_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
                             updated_at:
                               type: string
-                              example: '2026-08-07T01:32:00.000000Z'
+                              example: '2026-08-07T01:44:53.000000Z'
         403:
           description: 'Usuário autenticado não é o dono do veículo nem `is_admin`.'
           content:
@@ -1300,7 +1300,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/999
                 properties:
                   type:
@@ -1314,7 +1314,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/999
@@ -1418,9 +1418,9 @@ paths:
                     - hibrido
                     - eletrico
     delete:
-      summary: 'Delete a vehicle.'
-      operationId: deleteAVehicle
-      description: "`vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw\nPostgreSQL level, so `VehicleImage` rows disappear automatically along\nwith the vehicle — but that cascade never fires an Eloquent event, so\n`VehicleImageService::deleteAllForVehicle()` is called, inside the same\ntransaction, to also clean up the physical files from the public disk\n(deferred to after the commit, so a rollback never leaves the vehicle\ngone but its images' files still on disk, or vice versa)."
+      summary: 'Excluir um veículo'
+      operationId: excluirUmVeculo
+      description: "`vehicle_images.vehicle_id` é `cascadeOnDelete()` a nível de PostgreSQL puro, então as\nlinhas de `VehicleImage` somem automaticamente junto com o veículo — mas esse cascade\nnunca dispara um evento Eloquent, então `VehicleImageService::deleteAllForVehicle()` é\nchamado, dentro da mesma transação, para também limpar os arquivos físicos do disco\npúblico (adiado até depois do commit, para um rollback nunca deixar o veículo\nremovido mas seus arquivos de imagem ainda no disco, ou vice-versa)."
       parameters: []
       responses:
         204:
@@ -1468,7 +1468,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/999
                 properties:
                   type:
@@ -1482,7 +1482,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/999
@@ -1499,9 +1499,9 @@ paths:
           type: integer
   '/api/vehicles/{vehicle_id}/images':
     post:
-      summary: 'Upload one or more images for a vehicle.'
-      operationId: uploadOneOrMoreImagesForAVehicle
-      description: "`VehiclePolicy::manageImages` gates this the same way `update`/`delete`\nalready gate their own actions: only the vehicle's owner or an\n`is_admin` user may add images to it."
+      summary: 'Enviar uma ou mais imagens para um veículo'
+      operationId: enviarUmaOuMaisImagensParaUmVeculo
+      description: "`VehiclePolicy::manageImages` restringe isto do mesmo jeito que `update`/`delete` já\nrestringem suas próprias ações: só o dono do veículo ou um usuário `is_admin` pode\nadicionar imagens a ele."
       parameters: []
       responses:
         201:
@@ -1513,41 +1513,41 @@ paths:
                 example:
                   data:
                     -
-                      id: 46
+                      id: 58
                       path: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
                       url: 'http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg'
                       is_cover: false
-                      created_at: '2026-08-07T01:32:00.000000Z'
-                      updated_at: '2026-08-07T01:32:00.000000Z'
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
                     -
-                      id: 47
+                      id: 59
                       path: vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg
                       url: 'http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg'
                       is_cover: false
-                      created_at: '2026-08-07T01:32:00.000000Z'
-                      updated_at: '2026-08-07T01:32:00.000000Z'
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
                 properties:
                   data:
                     type: array
                     example:
-                      - id: 46
+                      - id: 58
                         path: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
                         url: 'http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg'
                         is_cover: false
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
-                      - id: 47
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                      - id: 59
                         path: vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg
                         url: 'http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg'
                         is_cover: false
-                        created_at: '2026-08-07T01:32:00.000000Z'
-                        updated_at: '2026-08-07T01:32:00.000000Z'
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
                     items:
                       type: object
                       properties:
                         id:
                           type: integer
-                          example: 46
+                          example: 58
                         path:
                           type: string
                           example: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
@@ -1559,10 +1559,10 @@ paths:
                           example: false
                         created_at:
                           type: string
-                          example: '2026-08-07T01:32:00.000000Z'
+                          example: '2026-08-07T01:44:53.000000Z'
                         updated_at:
                           type: string
-                          example: '2026-08-07T01:32:00.000000Z'
+                          example: '2026-08-07T01:44:53.000000Z'
         403:
           description: ''
           content:
@@ -1601,7 +1601,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/999/images
                 properties:
                   type:
@@ -1615,7 +1615,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/999/images
@@ -1687,9 +1687,9 @@ paths:
           type: integer
   '/api/vehicles/{vehicle_id}/images/{imageId}/cover':
     patch:
-      summary: 'Set the cover of a vehicle to one of its own images.'
-      operationId: setTheCoverOfAVehicleToOneOfItsOwnImages
-      description: "`{imageId}` is resolved manually (`vehicle_id`-scoped query +\n`findOrFail`) instead of via implicit nested route-model binding:\nnested binding would need `{vehicle}` and `{image}` to be related\nthrough a named Eloquent relationship matching the route segment,\nwhereas here the check that the image actually belongs to this\nvehicle *is* the interesting behaviour (an image from a different\nvehicle must 404, not 403), so it is spelled out explicitly.\n`findOrFail` throws a `ModelNotFoundException`, which the exception\nhandler in `bootstrap/app.php` already rewrites into a 404\n`application/problem+json` response — nothing extra to do here for\neither \"wrong vehicle\" or \"no such image\"."
+      summary: 'Definir a capa de um veículo'
+      operationId: definirACapaDeUmVeculo
+      description: "`{imageId}` é resolvido manualmente (query com escopo por `vehicle_id` + `findOrFail`)\nem vez de nested route-model binding implícito: o binding aninhado precisaria que\n`{vehicle}` e `{image}` estivessem relacionados por um relationship Eloquent nomeado\nbatendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente\nchecar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar\n404, não 403), então isso fica explícito. `findOrFail` lança `ModelNotFoundException`,\nque o exception handler em `bootstrap/app.php` já reescreve como 404\n`application/problem+json` — nada extra é necessário aqui, seja pra \"veículo errado\"\nou \"imagem inexistente\"."
       parameters: []
       responses:
         200:
@@ -1700,19 +1700,19 @@ paths:
                 type: object
                 example:
                   data:
-                    id: 48
+                    id: 60
                     path: vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg
                     url: 'http://localhost:8000/storage/vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg'
                     is_cover: false
-                    created_at: '2026-08-07T01:32:00.000000Z'
-                    updated_at: '2026-08-07T01:32:00.000000Z'
+                    created_at: '2026-08-07T01:44:54.000000Z'
+                    updated_at: '2026-08-07T01:44:54.000000Z'
                 properties:
                   data:
                     type: object
                     properties:
                       id:
                         type: integer
-                        example: 48
+                        example: 60
                       path:
                         type: string
                         example: vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg
@@ -1724,10 +1724,10 @@ paths:
                         example: false
                       created_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:54.000000Z'
                       updated_at:
                         type: string
-                        example: '2026-08-07T01:32:00.000000Z'
+                        example: '2026-08-07T01:44:54.000000Z'
         403:
           description: ''
           content:
@@ -1766,7 +1766,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/1/images/999/cover
                 properties:
                   type:
@@ -1780,7 +1780,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/1/images/999/cover
@@ -1805,9 +1805,9 @@ paths:
           type: integer
   '/api/vehicles/{vehicle_id}/images/{imageId}':
     delete:
-      summary: 'Delete a single image belonging to a vehicle.'
-      operationId: deleteASingleImageBelongingToAVehicle
-      description: "The image is looked up through `$vehicle->images()` rather than a\nglobal `VehicleImage::findOrFail()` (or implicit route-model binding\non `{imageId}`): this guarantees an image belonging to a different\nvehicle 404s exactly like one that doesn't exist at all, instead of\nleaking a 403 (or succeeding) for an id that is real but not \"this\nvehicle's\"."
+      summary: 'Excluir uma imagem de um veículo'
+      operationId: excluirUmaImagemDeUmVeculo
+      description: "A imagem é buscada através de `$vehicle->images()` em vez de um `VehicleImage::findOrFail()`\nglobal (ou binding implícito de rota em `{imageId}`): isso garante que uma imagem\npertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de\nvazar um 403 (ou ter sucesso) para um id que é real mas não é \"deste veículo\"."
       parameters: []
       responses:
         204:
@@ -1855,7 +1855,7 @@ paths:
                   type: 'about:blank'
                   title: 'Not Found'
                   status: 404
-                  detail: 'The requested resource was not found.'
+                  detail: 'O recurso solicitado não foi encontrado.'
                   instance: /api/vehicles/1/images/999
                 properties:
                   type:
@@ -1869,7 +1869,7 @@ paths:
                     example: 404
                   detail:
                     type: string
-                    example: 'The requested resource was not found.'
+                    example: 'O recurso solicitado não foi encontrado.'
                   instance:
                     type: string
                     example: /api/vehicles/1/images/999

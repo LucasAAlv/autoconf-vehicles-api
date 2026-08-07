@@ -12,31 +12,13 @@ endpoints:
       groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'List vehicles, paginated.'
+      title: 'Listar veículos, paginado'
       description: |-
-        `VehiclePolicy::viewAny` already allows any authenticated user, so
-        this lists every vehicle in the system, not just the caller's own —
-        consistent with `show()`, which likewise doesn't gate on ownership.
-
-        `Vehicle::query()` is ordered by `id` (so pagination is deterministic)
-        and paginated. `q`/`marca`/`modelo`/`placa` filtering is delegated to
-        `Vehicle::scopeFilter()` (issue #30) so this method stays a thin
-        pass-through of the validated input; sorting (issue #31) extends this
-        same query rather than replacing it, via `Vehicle::scopeSort()`, and is
-        chained *before* the trailing `orderBy('id')` so the requested fields
-        take precedence and `id` only breaks ties among rows equal on all of
-        them.
-
-        `per_page` is clamped to `MAX_PER_PAGE` instead of erroring, so a
-        client asking for an unbounded page size just gets the cap back.
-        `VehicleResource::collection()` on a paginator carries `total`,
-        `current_page`, `last_page` and `per_page` through automatically in
-        the response's `meta` envelope, so no custom collection class is
-        needed to satisfy those fields.
-
-        Note: unlike `show()`/`store()`/`update()`, this list view never eager-loads
-        `creator`/`updater`/`images`, so those keys are absent from each item here —
-        fetch `GET /vehicles/{vehicle}` for the full shape.
+        `VehiclePolicy::viewAny` já permite qualquer usuário autenticado, então isto lista
+        todos os veículos do sistema, não só os do próprio usuário — consistente com `show()`,
+        que também não restringe por posse. Ao contrário de `show()`/`store()`/`update()`, esta
+        listagem nunca carrega `creator`/`updater`/`images` — busque `GET /vehicles/{vehicle}`
+        para o formato completo.
       authenticated: true
       deprecated: false
     headers:
@@ -221,7 +203,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":[{"id":57,"placa":"NGZ0A00","chassi":"MIYVDLJNIKH000000","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":99,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"},{"id":58,"placa":"SIT0A01","chassi":"CPSCQLDZSNR000001","marca":"Honda","modelo":"Corolla","versao":"Titanium","valor_venda":"174593.24","cor":"teal","km":138484,"cambio":"automatico","combustivel":"diesel","user_id":100,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
+        content: '{"data":[{"id":73,"placa":"NGZ0A00","chassi":"MIYVDLJNIKH000000","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":127,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"},{"id":74,"placa":"SIT0A01","chassi":"CPSCQLDZSNR000001","marca":"Honda","modelo":"Corolla","versao":"Titanium","valor_venda":"174593.24","cor":"teal","km":138484,"cambio":"automatico","combustivel":"diesel","user_id":128,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}],"links":{"first":"\/?page=1","last":"\/?page=1","prev":null,"next":null},"meta":{"current_page":1,"from":1,"last_page":1,"links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"\/?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"path":"\/","per_page":15,"to":2,"total":2}}'
         headers: []
         description: 'Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.'
       -
@@ -246,14 +228,13 @@ endpoints:
       groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Create a new vehicle owned by the authenticated user.'
+      title: 'Criar um novo veículo'
       description: |-
-        `user_id` is not part of `$request->validated()` — it is not
-        validated input at all, it is assigned directly from the
-        authenticated user, so a client can never influence it by including
-        it in the payload (`Vehicle::$fillable` also excludes it, as a second
-        line of defense). `created_by`/`updated_by` are stamped separately by
-        `VehicleObserver` on the `creating` event.
+        `user_id` não faz parte de `$request->validated()` — não é sequer um dado validado, é
+        atribuído diretamente a partir do usuário autenticado, então um cliente nunca consegue
+        influenciá-lo incluindo-o no payload (`Vehicle::$fillable` também o exclui, como
+        segunda linha de defesa). `created_by`/`updated_by` são carimbados separadamente pelo
+        `VehicleObserver` no evento `creating`.
       authenticated: true
       deprecated: false
     headers:
@@ -398,7 +379,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"data":{"id":59,"placa":"GZM0A02","chassi":"IYVDLJNIKHW000002","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":101,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":43,"path":"vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
+        content: '{"data":{"id":75,"placa":"GZM0A02","chassi":"IYVDLJNIKHW000002","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":129,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z","creator":null,"updater":null,"images":[{"id":55,"path":"vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/258\/f2726f3d-9044-3663-bede-2a0f37053879.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}]}}'
         headers: []
         description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.'
       -
@@ -410,7 +391,7 @@ endpoints:
       -
         custom: []
         status: 422
-        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"The placa has already been taken. (and 1 more error)","instance":"\/api\/vehicles","errors":{"placa":["J\u00e1 existe um ve\u00edculo cadastrado com essa placa."],"chassi":["J\u00e1 existe um ve\u00edculo cadastrado com esse chassi."]}}'
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"J\u00e1 existe um ve\u00edculo cadastrado com essa placa. (and 1 more error)","instance":"\/api\/vehicles","errors":{"placa":["J\u00e1 existe um ve\u00edculo cadastrado com essa placa."],"chassi":["J\u00e1 existe um ve\u00edculo cadastrado com esse chassi."]}}'
         headers: []
         description: ''
     responseFields: []
@@ -429,12 +410,11 @@ endpoints:
       groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Show a single vehicle.'
+      title: 'Exibir um único veículo'
       description: |-
-        `VehiclePolicy::view` currently allows any authenticated user
-        regardless of ownership, so this call trivially passes today — it is
-        wired in now so a later issue that tightens the policy doesn't need
-        to touch this controller.
+        `VehiclePolicy::view` hoje permite qualquer usuário autenticado independentemente da
+        posse, então esta chamada sempre passa trivialmente — já está conectada agora para que
+        uma issue futura que restrinja a policy não precise tocar neste controller.
       authenticated: true
       deprecated: false
     headers:
@@ -463,7 +443,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":60,"placa":"NGZ0A03","chassi":"MIYVDLJNIKH000003","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":104,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":44,"path":"vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
+        content: '{"data":{"id":76,"placa":"NGZ0A03","chassi":"MIYVDLJNIKH000003","marca":"Chevrolet","modelo":"Kicks","versao":"1.6 Turbo","valor_venda":"152854.40","cor":"fuchsia","km":208376,"cambio":"manual","combustivel":"gasolina","user_id":132,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z","creator":null,"updater":null,"images":[{"id":56,"path":"vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/763\/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}]}}'
         headers: []
         description: ''
       -
@@ -475,7 +455,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/999"}'
         headers: []
         description: ''
     responseFields: []
@@ -658,7 +638,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"data":{"id":61,"placa":"GZM0A04","chassi":"IYVDLJNIKHW000004","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":107,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z","creator":null,"updater":null,"images":[{"id":45,"path":"vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","is_cover":false,"created_at":"2026-08-07T01:32:00.000000Z","updated_at":"2026-08-07T01:32:00.000000Z"}]}}'
+        content: '{"data":{"id":77,"placa":"GZM0A04","chassi":"IYVDLJNIKHW000004","marca":"Ford","modelo":"Cronos","versao":"Comfortline","valor_venda":"54132.38","cor":"navy","km":237248,"cambio":"manual","combustivel":"gasolina","user_id":135,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z","creator":null,"updater":null,"images":[{"id":57,"path":"vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/945\/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}]}}'
         headers: []
         description: 'Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).'
       -
@@ -670,7 +650,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/999"}'
         headers: []
         description: ''
       -
@@ -695,15 +675,14 @@ endpoints:
       groupDescription: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
       subgroup: ''
       subgroupDescription: ''
-      title: 'Delete a vehicle.'
+      title: 'Excluir um veículo'
       description: |-
-        `vehicle_images.vehicle_id` is `cascadeOnDelete()` at the raw
-        PostgreSQL level, so `VehicleImage` rows disappear automatically along
-        with the vehicle — but that cascade never fires an Eloquent event, so
-        `VehicleImageService::deleteAllForVehicle()` is called, inside the same
-        transaction, to also clean up the physical files from the public disk
-        (deferred to after the commit, so a rollback never leaves the vehicle
-        gone but its images' files still on disk, or vice versa).
+        `vehicle_images.vehicle_id` é `cascadeOnDelete()` a nível de PostgreSQL puro, então as
+        linhas de `VehicleImage` somem automaticamente junto com o veículo — mas esse cascade
+        nunca dispara um evento Eloquent, então `VehicleImageService::deleteAllForVehicle()` é
+        chamado, dentro da mesma transação, para também limpar os arquivos físicos do disco
+        público (adiado até depois do commit, para um rollback nunca deixar o veículo
+        removido mas seus arquivos de imagem ainda no disco, ou vice-versa).
       authenticated: true
       deprecated: false
     headers:
@@ -744,7 +723,7 @@ endpoints:
       -
         custom: []
         status: 404
-        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"The requested resource was not found.","instance":"\/api\/vehicles\/999"}'
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/999"}'
         headers: []
         description: ''
     responseFields: []
