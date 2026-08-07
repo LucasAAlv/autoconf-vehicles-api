@@ -1,0 +1,2900 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Documentação da API Autoconf Vehicles</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../docs/css/theme-default.style.css" media="screen">
+    <link rel="stylesheet" href="../docs/css/theme-default.print.css" media="print">
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/obsidian.min.css">
+    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jets/0.14.1/jets.min.js"></script>
+
+    <style id="language-style">
+        /* starts out as display none and is replaced with js later  */
+                    body .content .bash-example code { display: none; }
+                    body .content .javascript-example code { display: none; }
+            </style>
+
+    <script>
+        var tryItOutBaseUrl = "http://localhost:8000";
+        var useCsrf = Boolean(1);
+        var csrfUrl = "/sanctum/csrf-cookie";
+    </script>
+    <script src="../docs/js/tryitout-5.11.0.js"></script>
+
+    <script src="../docs/js/theme-default-5.11.0.js"></script>
+
+</head>
+
+<body data-languages="[&quot;bash&quot;,&quot;javascript&quot;]">
+
+<a href="#" id="nav-button">
+    <span>
+        MENU
+        <img src="../docs/images/navbar.png" alt="navbar-image"/>
+    </span>
+</a>
+<div class="tocify-wrapper">
+    
+            <div class="lang-selector">
+                                            <button type="button" class="lang-button" data-language-name="bash">bash</button>
+                                            <button type="button" class="lang-button" data-language-name="javascript">javascript</button>
+                    </div>
+    
+    <div class="search">
+        <input type="text" class="search" id="input-search" placeholder="Buscar">
+    </div>
+
+    <div id="toc">
+                    <ul id="tocify-header-introducao" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="introducao">
+                    <a href="#introducao">Introdução</a>
+                </li>
+                                    <ul id="tocify-subheader-introducao" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="autenticacao">
+                                <a href="#autenticacao">Autenticação</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-autenticando-requisicoes" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="autenticando-requisicoes">
+                    <a href="#autenticando-requisicoes">Autenticando requisições</a>
+                </li>
+                            </ul>
+                    <ul id="tocify-header-auth" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="auth">
+                    <a href="#auth">Auth</a>
+                </li>
+                                    <ul id="tocify-subheader-auth" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="auth-POSTapi-auth-register">
+                                <a href="#auth-POSTapi-auth-register">Criar uma nova conta de usuário</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-auth-login">
+                                <a href="#auth-POSTapi-auth-login">Autenticar um usuário para a sessão stateful da SPA</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-GETapi-auth-me">
+                                <a href="#auth-GETapi-auth-me">Retornar o usuário autenticado atual</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="auth-POSTapi-auth-logout">
+                                <a href="#auth-POSTapi-auth-logout">Encerrar a sessão autenticada da SPA</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-vehicles" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="vehicles">
+                    <a href="#vehicles">Vehicles</a>
+                </li>
+                                    <ul id="tocify-subheader-vehicles" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="vehicles-GETapi-vehicles">
+                                <a href="#vehicles-GETapi-vehicles">Listar veículos, paginado</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="vehicles-POSTapi-vehicles">
+                                <a href="#vehicles-POSTapi-vehicles">Criar um novo veículo</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="vehicles-GETapi-vehicles--vehicle_id-">
+                                <a href="#vehicles-GETapi-vehicles--vehicle_id-">Exibir um único veículo</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="vehicles-PUTapi-vehicles--vehicle_id-">
+                                <a href="#vehicles-PUTapi-vehicles--vehicle_id-">Atualizar um veículo</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="vehicles-DELETEapi-vehicles--vehicle_id-">
+                                <a href="#vehicles-DELETEapi-vehicles--vehicle_id-">Excluir um veículo</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+                    <ul id="tocify-header-images" class="tocify-header">
+                <li class="tocify-item level-1" data-unique="images">
+                    <a href="#images">Images</a>
+                </li>
+                                    <ul id="tocify-subheader-images" class="tocify-subheader">
+                                                    <li class="tocify-item level-2" data-unique="images-POSTapi-vehicles--vehicle_id--images">
+                                <a href="#images-POSTapi-vehicles--vehicle_id--images">Enviar uma ou mais imagens para um veículo</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="images-PATCHapi-vehicles--vehicle_id--images--imageId--cover">
+                                <a href="#images-PATCHapi-vehicles--vehicle_id--images--imageId--cover">Definir a capa de um veículo</a>
+                            </li>
+                                                                                <li class="tocify-item level-2" data-unique="images-DELETEapi-vehicles--vehicle_id--images--imageId-">
+                                <a href="#images-DELETEapi-vehicles--vehicle_id--images--imageId-">Excluir uma imagem de um veículo</a>
+                            </li>
+                                                                        </ul>
+                            </ul>
+            </div>
+
+    <ul class="toc-footer" id="toc-footer">
+                    <li style="padding-bottom: 5px;"><a href="../docs/collection.json">Ver coleção Postman</a></li>
+                            <li style="padding-bottom: 5px;"><a href="../docs/openapi.yaml">Ver especificação OpenAPI</a></li>
+                <li><a href="http://github.com/knuckleswtf/scribe">Documentation powered by Scribe ✍</a></li>
+    </ul>
+
+    <ul class="toc-footer" id="last-updated">
+        <li>Last updated: August 7, 2026</li>
+    </ul>
+</div>
+
+<div class="page-wrapper">
+    <div class="dark-box"></div>
+    <div class="content">
+        <h1 id="introducao">Introdução</h1>
+<p>API para um SaaS multiusuário de gestão de veículos: autenticação, cadastro de veículos e gestão de imagens com capa única.</p>
+<aside>
+    <strong>URL base</strong>: <code>http://localhost:8000</code>
+</aside>
+<p>Esta documentação cobre todo endpoint exposto pela API Autoconf Vehicles: autenticação, CRUD de veículos e gestão de imagens de veículos.</p>
+<aside>Ao rolar a página, você verá exemplos de código para consumir a API em diferentes linguagens de programação na área escura à direita (ou como parte do conteúdo no celular).
+É possível trocar a linguagem usada pelas abas no canto superior direito (ou pelo menu de navegação no canto superior esquerdo no celular).</aside>
+<h2 id="autenticacao">Autenticação</h2>
+<p>Esta API é uma <strong>SPA Laravel Sanctum</strong> — autenticada por um cookie de sessão <code>HttpOnly</code>, não por um bearer token. Não existe uma API key pra digitar nesta doc. Para se autenticar a partir desta página:</p>
+<ol>
+<li>Chame <strong><code>POST /auth/register</code></strong> (ou use uma conta existente) e depois <strong><code>POST /auth/login</code></strong> usando o botão "Try It Out". Um login bem-sucedido define o cookie de sessão no seu navegador.</li>
+<li>A partir daí, todo outro "Try It Out" nesta página busca automaticamente um cookie CSRF novo em <code>GET /sanctum/csrf-cookie</code> e envia seu valor de volta como o header <code>X-XSRF-TOKEN</code>, exatamente como o front-end SPA real faz — não é necessário copiar nenhum token manualmente.</li>
+<li><code>POST /auth/logout</code> limpa tanto a sessão quanto o token CSRF.</li>
+</ol>
+<p>Uma requisição não autenticada a qualquer endpoint que exige sessão recebe uma resposta <code>401</code> <code>application/problem+json</code>.</p>
+
+        <h1 id="autenticando-requisicoes">Autenticando requisições</h1>
+<p>Esta API é autenticada via cookie de sessão de uma SPA Laravel Sanctum, não por um bearer/header/query token — veja a seção "Authentication" acima para o fluxo exato de login + CSRF a usar a partir desta documentação.</p>
+
+        <h1 id="auth">Auth</h1>
+
+    <p>Registro, login, logout e o usuário autenticado atual. Esta API é uma <strong>SPA
+Sanctum</strong>: um <code>login</code> bem-sucedido (ou <code>register</code> seguido de <code>login</code>) define um
+cookie de sessão <code>HttpOnly</code>, e toda requisição autenticada subsequente precisa
+carregar um header <code>X-XSRF-TOKEN</code> válido, obtido a partir do cookie <code>XSRF-TOKEN</code>
+entregue por <code>GET /sanctum/csrf-cookie</code> — veja a seção "Authentication" acima.</p>
+
+                                <h2 id="auth-POSTapi-auth-register">Criar uma nova conta de usuário</h2>
+
+<p>
+</p>
+
+<p>Isso não inicia também uma sessão autenticada: registro e login são mantidos como dois
+passos separados e explícitos, seguindo o contrato simples que <code>POST /auth/register</code>
+promete. <code>User::create()</code> só recebe os campos já validados da requisição, então um
+payload que também envie <code>is_admin</code> (ou qualquer outro atributo) não tem como
+influenciar o registro criado.</p>
+
+<span id="example-requests-POSTapi-auth-register">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/auth/register" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"name\": \"Maria Souza\",
+    \"email\": \"maria.souza@example.com\",
+    \"password\": \"Str0ng!Passw0rd\",
+    \"password_confirmation\": \"Str0ng!Passw0rd\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/auth/register"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "name": "Maria Souza",
+    "email": "maria.souza@example.com",
+    "password": "Str0ng!Passw0rd",
+    "password_confirmation": "Str0ng!Passw0rd"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-register">
+            <blockquote>
+            <p>Resposta de exemplo (201, Conta criada com sucesso. Note que isso não autentica o usuário — é necessário chamar `POST /auth/login` em seguida.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;Maria Souza&quot;,
+    &quot;email&quot;: &quot;maria.souza@example.com&quot;,
+    &quot;created_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (422, Payload inválido — e-mail já cadastrado, senha e confirmação não coincidem, ou campo obrigatório ausente.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unprocessable Content&quot;,
+    &quot;status&quot;: 422,
+    &quot;detail&quot;: &quot;J&aacute; existe uma conta cadastrada com esse e-mail. (and 1 more error)&quot;,
+    &quot;instance&quot;: &quot;/api/auth/register&quot;,
+    &quot;errors&quot;: {
+        &quot;email&quot;: [
+            &quot;J&aacute; existe uma conta cadastrada com esse e-mail.&quot;
+        ],
+        &quot;password&quot;: [
+            &quot;A confirma&ccedil;&atilde;o de senha n&atilde;o corresponde.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-auth-register" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-POSTapi-auth-register"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-register"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-register" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-register">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-POSTapi-auth-register" data-method="POST"
+      data-path="api/auth/register"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-register', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-register"
+                    onclick="tryItOut('POSTapi-auth-register');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-register"
+                    onclick="cancelTryOut('POSTapi-auth-register');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-register"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/register</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-register"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-register"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>name</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="name"                data-endpoint="POSTapi-auth-register"
+               value="Maria Souza"
+               data-component="body">
+    <br>
+<p>Nome completo do usuário. Example: <code>Maria Souza</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-auth-register"
+               value="maria.souza@example.com"
+               data-component="body">
+    <br>
+<p>E-mail único do usuário. Example: <code>maria.souza@example.com</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="POSTapi-auth-register"
+               value="Str0ng!Passw0rd"
+               data-component="body">
+    <br>
+<p>Senha do usuário, sujeita às regras padrão de senha do Laravel. Example: <code>Str0ng!Passw0rd</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password_confirmation</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password_confirmation"                data-endpoint="POSTapi-auth-register"
+               value="Str0ng!Passw0rd"
+               data-component="body">
+    <br>
+<p>Deve ser idêntica a <code>password</code>. Example: <code>Str0ng!Passw0rd</code></p>
+        </div>
+        </form>
+
+                    <h2 id="auth-POSTapi-auth-login">Autenticar um usuário para a sessão stateful da SPA</h2>
+
+<p>
+</p>
+
+<p><code>ValidationException::withMessages()</code> numa tentativa malsucedida é deliberado, não só
+conveniente: o exception renderer desta aplicação já transforma qualquer
+<code>ValidationException</code> no mesmo envelope <code>application/problem+json</code> 422 usado pela
+validação de Form Request, então uma falha de credenciais parece idêntica a qualquer
+outra falha de validação para quem consome a API, sem o controller precisar montar
+essa resposta manualmente.</p>
+
+<span id="example-requests-POSTapi-auth-login">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/auth/login" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"email\": \"maria.souza@example.com\",
+    \"password\": \"Str0ng!Passw0rd\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/auth/login"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "email": "maria.souza@example.com",
+    "password": "Str0ng!Passw0rd"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-login">
+            <blockquote>
+            <p>Resposta de exemplo (200, Login bem-sucedido. A resposta carrega o cookie de sessão `HttpOnly`; o corpo é o usuário autenticado.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;Maria Souza&quot;,
+    &quot;email&quot;: &quot;maria.souza@example.com&quot;,
+    &quot;created_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (422, Credenciais inválidas. Mesmo formato `application/problem+json` usado por qualquer outra falha de validação (422).):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unprocessable Content&quot;,
+    &quot;status&quot;: 422,
+    &quot;detail&quot;: &quot;Essas credenciais n&atilde;o correspondem aos nossos registros.&quot;,
+    &quot;instance&quot;: &quot;/api/auth/login&quot;,
+    &quot;errors&quot;: {
+        &quot;email&quot;: [
+            &quot;Essas credenciais n&atilde;o correspondem aos nossos registros.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-auth-login" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-POSTapi-auth-login"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-login"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-login" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-login">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-POSTapi-auth-login" data-method="POST"
+      data-path="api/auth/login"
+      data-authed="0"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-login', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-login"
+                    onclick="tryItOut('POSTapi-auth-login');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-login"
+                    onclick="cancelTryOut('POSTapi-auth-login');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-login"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/login</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-login"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-login"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>email</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="email"                data-endpoint="POSTapi-auth-login"
+               value="maria.souza@example.com"
+               data-component="body">
+    <br>
+<p>E-mail cadastrado. Example: <code>maria.souza@example.com</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>password</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="password"                data-endpoint="POSTapi-auth-login"
+               value="Str0ng!Passw0rd"
+               data-component="body">
+    <br>
+<p>Senha da conta. Example: <code>Str0ng!Passw0rd</code></p>
+        </div>
+        </form>
+
+                    <h2 id="auth-GETapi-auth-me">Retornar o usuário autenticado atual</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Esta rota fica atrás de <code>auth:sanctum</code>, então um visitante não autenticado nunca chega
+a este método: o próprio guard do Sanctum lança <code>AuthenticationException</code> antes, que o
+exception renderer da aplicação já transforma num 401 <code>application/problem+json</code>
+(configurado em <code>bootstrap/app.php</code>).</p>
+
+<span id="example-requests-GETapi-auth-me">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/auth/me" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/auth/me"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-auth-me">
+            <blockquote>
+            <p>Resposta de exemplo (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;Maria Souza&quot;,
+    &quot;email&quot;: &quot;maria.souza@example.com&quot;,
+    &quot;created_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-08-06T12:00:00.000000Z&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (401, Nenhuma sessão válida (cookie ausente/expirado, ou `X-XSRF-TOKEN` ausente/incorreto).):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unauthorized&quot;,
+    &quot;status&quot;: 401,
+    &quot;detail&quot;: &quot;Unauthenticated.&quot;,
+    &quot;instance&quot;: &quot;/api/auth/me&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-auth-me" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-GETapi-auth-me"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-auth-me"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-auth-me" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-GETapi-auth-me">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-GETapi-auth-me" data-method="GET"
+      data-path="api/auth/me"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-auth-me', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-auth-me"
+                    onclick="tryItOut('GETapi-auth-me');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-auth-me"
+                    onclick="cancelTryOut('GETapi-auth-me');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-auth-me"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/auth/me</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-auth-me"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-auth-me"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                    <h2 id="auth-POSTapi-auth-logout">Encerrar a sessão autenticada da SPA</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>Os três passos espelham o cuidado que <code>login()</code> já tem com sessões, na ordem inversa:
+desloga o guard, destrói os dados da sessão e gira o token CSRF, então nem o id de
+sessão nem o token CSRF que um atacante tenha observado antes do logout continuam
+válidos depois. <code>204 No Content</code> é usado em vez de <code>200</code> porque não há representação
+alguma pra devolver num logout.</p>
+
+<span id="example-requests-POSTapi-auth-logout">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/auth/logout" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/auth/logout"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "POST",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-auth-logout">
+            <blockquote>
+            <p>Resposta de exemplo (204, Sessão, dados de sessão e token CSRF invalidados com sucesso.):</p>
+        </blockquote>
+                <pre>
+<code>Resposta vazia</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (401):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unauthorized&quot;,
+    &quot;status&quot;: 401,
+    &quot;detail&quot;: &quot;Unauthenticated.&quot;,
+    &quot;instance&quot;: &quot;/api/auth/logout&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-auth-logout" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-POSTapi-auth-logout"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-auth-logout"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-auth-logout" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-auth-logout">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-POSTapi-auth-logout" data-method="POST"
+      data-path="api/auth/logout"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-auth-logout', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-auth-logout"
+                    onclick="tryItOut('POSTapi-auth-logout');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-auth-logout"
+                    onclick="cancelTryOut('POSTapi-auth-logout');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-auth-logout"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/auth/logout</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-auth-logout"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-auth-logout"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        </form>
+
+                <h1 id="vehicles">Vehicles</h1>
+
+    <p>CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (<code>user_id</code>) ou um usuário <code>is_admin</code> pode atualizar ou excluir.</p>
+
+                                <h2 id="vehicles-GETapi-vehicles">Listar veículos, paginado</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>VehiclePolicy::viewAny</code> já permite qualquer usuário autenticado, então isto lista
+todos os veículos do sistema, não só os do próprio usuário — consistente com <code>show()</code>,
+que também não restringe por posse. Ao contrário de <code>show()</code>/<code>store()</code>/<code>update()</code>, esta
+listagem nunca carrega <code>creator</code>/<code>updater</code>/<code>images</code> — busque <code>GET /vehicles/{vehicle}</code>
+para o formato completo.</p>
+
+<span id="example-requests-GETapi-vehicles">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/vehicles?q=Corolla&amp;marca=Toyota&amp;modelo=Corolla&amp;placa=ABC1D23&amp;sort=km%2C-valor_venda&amp;page=1&amp;per_page=15" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"page\": 16,
+    \"per_page\": 22,
+    \"q\": \"architecto\",
+    \"marca\": \"architecto\",
+    \"modelo\": \"architecto\",
+    \"placa\": \"architecto\",
+    \"sort\": \"architecto\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles"
+);
+
+const params = {
+    "q": "Corolla",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "placa": "ABC1D23",
+    "sort": "km,-valor_venda",
+    "page": "1",
+    "per_page": "15",
+};
+Object.keys(params)
+    .forEach(key =&gt; url.searchParams.append(key, params[key]));
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "page": 16,
+    "per_page": 22,
+    "q": "architecto",
+    "marca": "architecto",
+    "modelo": "architecto",
+    "placa": "architecto",
+    "sort": "architecto"
+};
+
+fetch(url, {
+    method: "GET",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-vehicles">
+            <blockquote>
+            <p>Resposta de exemplo (200, Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 73,
+            &quot;placa&quot;: &quot;NGZ0A00&quot;,
+            &quot;chassi&quot;: &quot;MIYVDLJNIKH000000&quot;,
+            &quot;marca&quot;: &quot;Chevrolet&quot;,
+            &quot;modelo&quot;: &quot;Kicks&quot;,
+            &quot;versao&quot;: &quot;1.6 Turbo&quot;,
+            &quot;valor_venda&quot;: &quot;152854.40&quot;,
+            &quot;cor&quot;: &quot;fuchsia&quot;,
+            &quot;km&quot;: 208376,
+            &quot;cambio&quot;: &quot;manual&quot;,
+            &quot;combustivel&quot;: &quot;gasolina&quot;,
+            &quot;user_id&quot;: 127,
+            &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+        },
+        {
+            &quot;id&quot;: 74,
+            &quot;placa&quot;: &quot;SIT0A01&quot;,
+            &quot;chassi&quot;: &quot;CPSCQLDZSNR000001&quot;,
+            &quot;marca&quot;: &quot;Honda&quot;,
+            &quot;modelo&quot;: &quot;Corolla&quot;,
+            &quot;versao&quot;: &quot;Titanium&quot;,
+            &quot;valor_venda&quot;: &quot;174593.24&quot;,
+            &quot;cor&quot;: &quot;teal&quot;,
+            &quot;km&quot;: 138484,
+            &quot;cambio&quot;: &quot;automatico&quot;,
+            &quot;combustivel&quot;: &quot;diesel&quot;,
+            &quot;user_id&quot;: 128,
+            &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+        }
+    ],
+    &quot;links&quot;: {
+        &quot;first&quot;: &quot;/?page=1&quot;,
+        &quot;last&quot;: &quot;/?page=1&quot;,
+        &quot;prev&quot;: null,
+        &quot;next&quot;: null
+    },
+    &quot;meta&quot;: {
+        &quot;current_page&quot;: 1,
+        &quot;from&quot;: 1,
+        &quot;last_page&quot;: 1,
+        &quot;links&quot;: [
+            {
+                &quot;url&quot;: null,
+                &quot;label&quot;: &quot;&amp;laquo; Previous&quot;,
+                &quot;page&quot;: null,
+                &quot;active&quot;: false
+            },
+            {
+                &quot;url&quot;: &quot;/?page=1&quot;,
+                &quot;label&quot;: &quot;1&quot;,
+                &quot;page&quot;: 1,
+                &quot;active&quot;: true
+            },
+            {
+                &quot;url&quot;: null,
+                &quot;label&quot;: &quot;Next &amp;raquo;&quot;,
+                &quot;page&quot;: null,
+                &quot;active&quot;: false
+            }
+        ],
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;per_page&quot;: 15,
+        &quot;to&quot;: 2,
+        &quot;total&quot;: 2
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (401):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unauthorized&quot;,
+    &quot;status&quot;: 401,
+    &quot;detail&quot;: &quot;Unauthenticated.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-vehicles" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-GETapi-vehicles"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-vehicles"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-vehicles" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-GETapi-vehicles">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-GETapi-vehicles" data-method="GET"
+      data-path="api/vehicles"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-vehicles', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-vehicles"
+                    onclick="tryItOut('GETapi-vehicles');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-vehicles"
+                    onclick="cancelTryOut('GETapi-vehicles');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-vehicles"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/vehicles</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-vehicles"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-vehicles"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Parâmetros de query</b></h4>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-vehicles"
+               value="Corolla"
+               data-component="query">
+    <br>
+<p>Busca livre (placa, chassi, marca, modelo ou versão). Example: <code>Corolla</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>marca</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="marca"                data-endpoint="GETapi-vehicles"
+               value="Toyota"
+               data-component="query">
+    <br>
+<p>Filtra por marca exata. Example: <code>Toyota</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>modelo</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="modelo"                data-endpoint="GETapi-vehicles"
+               value="Corolla"
+               data-component="query">
+    <br>
+<p>Filtra por modelo exato. Example: <code>Corolla</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>placa</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="placa"                data-endpoint="GETapi-vehicles"
+               value="ABC1D23"
+               data-component="query">
+    <br>
+<p>Filtra por placa exata. Example: <code>ABC1D23</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="sort"                data-endpoint="GETapi-vehicles"
+               value="km,-valor_venda"
+               data-component="query">
+    <br>
+<p>Lista separada por vírgulas de campos ordenáveis (<code>km</code>, <code>valor_venda</code>, <code>marca</code>, <code>modelo</code>, <code>created_at</code>), cada um opcionalmente prefixado com <code>-</code> para ordem decrescente. Example: <code>km,-valor_venda</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="page"                data-endpoint="GETapi-vehicles"
+               value="1"
+               data-component="query">
+    <br>
+<p>Número da página (1-indexado). Example: <code>1</code></p>
+            </div>
+                                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-vehicles"
+               value="15"
+               data-component="query">
+    <br>
+<p>Itens por página (padrão 15, máximo 100 — valores maiores são reduzidos ao limite). Example: <code>15</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="page"                data-endpoint="GETapi-vehicles"
+               value="16"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Example: <code>16</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>per_page</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="per_page"                data-endpoint="GETapi-vehicles"
+               value="22"
+               data-component="body">
+    <br>
+<p>Must be at least 1. Example: <code>22</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>q</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="q"                data-endpoint="GETapi-vehicles"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>marca</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="marca"                data-endpoint="GETapi-vehicles"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>modelo</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="modelo"                data-endpoint="GETapi-vehicles"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>placa</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="placa"                data-endpoint="GETapi-vehicles"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>sort</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="sort"                data-endpoint="GETapi-vehicles"
+               value="architecto"
+               data-component="body">
+    <br>
+<p>Example: <code>architecto</code></p>
+        </div>
+        </form>
+
+                    <h2 id="vehicles-POSTapi-vehicles">Criar um novo veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>user_id</code> não faz parte de <code>$request-&gt;validated()</code> — não é sequer um dado validado, é
+atribuído diretamente a partir do usuário autenticado, então um cliente nunca consegue
+influenciá-lo incluindo-o no payload (<code>Vehicle::$fillable</code> também o exclui, como
+segunda linha de defesa). <code>created_by</code>/<code>updated_by</code> são carimbados separadamente pelo
+<code>VehicleObserver</code> no evento <code>creating</code>.</p>
+
+<span id="example-requests-POSTapi-vehicles">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/vehicles" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"placa\": \"ABC1D23\",
+    \"chassi\": \"9BWZZZ377VT004251\",
+    \"marca\": \"Toyota\",
+    \"modelo\": \"Corolla\",
+    \"versao\": \"XEi 2.0\",
+    \"valor_venda\": 129900,
+    \"cor\": \"Prata\",
+    \"km\": 15000,
+    \"cambio\": \"manual\",
+    \"combustivel\": \"flex\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "placa": "ABC1D23",
+    "chassi": "9BWZZZ377VT004251",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "versao": "XEi 2.0",
+    "valor_venda": 129900,
+    "cor": "Prata",
+    "km": 15000,
+    "cambio": "manual",
+    "combustivel": "flex"
+};
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-vehicles">
+            <blockquote>
+            <p>Resposta de exemplo (201, Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 75,
+        &quot;placa&quot;: &quot;GZM0A02&quot;,
+        &quot;chassi&quot;: &quot;IYVDLJNIKHW000002&quot;,
+        &quot;marca&quot;: &quot;Ford&quot;,
+        &quot;modelo&quot;: &quot;Cronos&quot;,
+        &quot;versao&quot;: &quot;Comfortline&quot;,
+        &quot;valor_venda&quot;: &quot;54132.38&quot;,
+        &quot;cor&quot;: &quot;navy&quot;,
+        &quot;km&quot;: 237248,
+        &quot;cambio&quot;: &quot;manual&quot;,
+        &quot;combustivel&quot;: &quot;gasolina&quot;,
+        &quot;user_id&quot;: 129,
+        &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;creator&quot;: null,
+        &quot;updater&quot;: null,
+        &quot;images&quot;: [
+            {
+                &quot;id&quot;: 55,
+                &quot;path&quot;: &quot;vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg&quot;,
+                &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg&quot;,
+                &quot;is_cover&quot;: false,
+                &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+            }
+        ]
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (401):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unauthorized&quot;,
+    &quot;status&quot;: 401,
+    &quot;detail&quot;: &quot;Unauthenticated.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (422):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unprocessable Content&quot;,
+    &quot;status&quot;: 422,
+    &quot;detail&quot;: &quot;J&aacute; existe um ve&iacute;culo cadastrado com essa placa. (and 1 more error)&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles&quot;,
+    &quot;errors&quot;: {
+        &quot;placa&quot;: [
+            &quot;J&aacute; existe um ve&iacute;culo cadastrado com essa placa.&quot;
+        ],
+        &quot;chassi&quot;: [
+            &quot;J&aacute; existe um ve&iacute;culo cadastrado com esse chassi.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-vehicles" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-POSTapi-vehicles"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-vehicles"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-vehicles" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-vehicles">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-POSTapi-vehicles" data-method="POST"
+      data-path="api/vehicles"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-vehicles', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-vehicles"
+                    onclick="tryItOut('POSTapi-vehicles');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-vehicles"
+                    onclick="cancelTryOut('POSTapi-vehicles');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-vehicles"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/vehicles</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-vehicles"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-vehicles"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>placa</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="placa"                data-endpoint="POSTapi-vehicles"
+               value="ABC1D23"
+               data-component="body">
+    <br>
+<p>Placa única (formato Mercosul ou tradicional). Example: <code>ABC1D23</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>chassi</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="chassi"                data-endpoint="POSTapi-vehicles"
+               value="9BWZZZ377VT004251"
+               data-component="body">
+    <br>
+<p>Chassi único, exatamente 17 caracteres alfanuméricos (VIN). Example: <code>9BWZZZ377VT004251</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>marca</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="marca"                data-endpoint="POSTapi-vehicles"
+               value="Toyota"
+               data-component="body">
+    <br>
+<p>Marca do veículo. Example: <code>Toyota</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>modelo</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="modelo"                data-endpoint="POSTapi-vehicles"
+               value="Corolla"
+               data-component="body">
+    <br>
+<p>Modelo do veículo. Example: <code>Corolla</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>versao</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="versao"                data-endpoint="POSTapi-vehicles"
+               value="XEi 2.0"
+               data-component="body">
+    <br>
+<p>Versão/trim do veículo. Example: <code>XEi 2.0</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>valor_venda</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="valor_venda"                data-endpoint="POSTapi-vehicles"
+               value="129900"
+               data-component="body">
+    <br>
+<p>Valor de venda em reais, mínimo 0.01. Example: <code>129900</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cor</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="cor"                data-endpoint="POSTapi-vehicles"
+               value="Prata"
+               data-component="body">
+    <br>
+<p>Cor do veículo. Example: <code>Prata</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>km</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="km"                data-endpoint="POSTapi-vehicles"
+               value="15000"
+               data-component="body">
+    <br>
+<p>Quilometragem, inteiro não negativo. Example: <code>15000</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cambio</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="cambio"                data-endpoint="POSTapi-vehicles"
+               value="manual"
+               data-component="body">
+    <br>
+<p>Tipo de câmbio. Example: <code>manual</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>manual</code></li> <li><code>automatico</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>combustivel</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="combustivel"                data-endpoint="POSTapi-vehicles"
+               value="flex"
+               data-component="body">
+    <br>
+<p>Tipo de combustível. Example: <code>flex</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>gasolina</code></li> <li><code>alcool</code></li> <li><code>flex</code></li> <li><code>diesel</code></li> <li><code>hibrido</code></li> <li><code>eletrico</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="vehicles-GETapi-vehicles--vehicle_id-">Exibir um único veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>VehiclePolicy::view</code> hoje permite qualquer usuário autenticado independentemente da
+posse, então esta chamada sempre passa trivialmente — já está conectada agora para que
+uma issue futura que restrinja a policy não precise tocar neste controller.</p>
+
+<span id="example-requests-GETapi-vehicles--vehicle_id-">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request GET \
+    --get "http://localhost:8000/api/vehicles/1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "GET",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-GETapi-vehicles--vehicle_id-">
+            <blockquote>
+            <p>Resposta de exemplo (200):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 76,
+        &quot;placa&quot;: &quot;NGZ0A03&quot;,
+        &quot;chassi&quot;: &quot;MIYVDLJNIKH000003&quot;,
+        &quot;marca&quot;: &quot;Chevrolet&quot;,
+        &quot;modelo&quot;: &quot;Kicks&quot;,
+        &quot;versao&quot;: &quot;1.6 Turbo&quot;,
+        &quot;valor_venda&quot;: &quot;152854.40&quot;,
+        &quot;cor&quot;: &quot;fuchsia&quot;,
+        &quot;km&quot;: 208376,
+        &quot;cambio&quot;: &quot;manual&quot;,
+        &quot;combustivel&quot;: &quot;gasolina&quot;,
+        &quot;user_id&quot;: 132,
+        &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;creator&quot;: null,
+        &quot;updater&quot;: null,
+        &quot;images&quot;: [
+            {
+                &quot;id&quot;: 56,
+                &quot;path&quot;: &quot;vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg&quot;,
+                &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg&quot;,
+                &quot;is_cover&quot;: false,
+                &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+            }
+        ]
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (401):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unauthorized&quot;,
+    &quot;status&quot;: 401,
+    &quot;detail&quot;: &quot;Unauthenticated.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/999&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-GETapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-GETapi-vehicles--vehicle_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-GETapi-vehicles--vehicle_id-"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-GETapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-GETapi-vehicles--vehicle_id-">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-GETapi-vehicles--vehicle_id-" data-method="GET"
+      data-path="api/vehicles/{vehicle_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('GETapi-vehicles--vehicle_id-', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-GETapi-vehicles--vehicle_id-"
+                    onclick="tryItOut('GETapi-vehicles--vehicle_id-');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-GETapi-vehicles--vehicle_id-"
+                    onclick="cancelTryOut('GETapi-vehicles--vehicle_id-');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-GETapi-vehicles--vehicle_id-"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-green">GET</small>
+            <b><code>api/vehicles/{vehicle_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="GETapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="GETapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="GETapi-vehicles--vehicle_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="vehicles-PUTapi-vehicles--vehicle_id-">Atualizar um veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>PUT</code> e <code>PATCH</code> chegam ambos aqui e se comportam de forma idêntica: todo campo em
+<code>UpdateVehicleRequest</code> é <code>sometimes</code>, então um campo ausente simplesmente permanece
+intocado pelo <code>fill()</code> em vez de ser zerado — não há distinção de "PUT substitui tudo".
+<code>updated_by</code> não é setado pelo controller — <code>VehicleObserver</code> o carimba a partir do
+usuário autenticado no evento <code>updating</code>.</p>
+
+<span id="example-requests-PUTapi-vehicles--vehicle_id-">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PUT \
+    "http://localhost:8000/api/vehicles/1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json" \
+    --data "{
+    \"placa\": \"ABC1D23\",
+    \"chassi\": \"9BWZZZ377VT004251\",
+    \"marca\": \"Toyota\",
+    \"modelo\": \"Corolla\",
+    \"versao\": \"XEi 2.0\",
+    \"valor_venda\": 134900,
+    \"cor\": \"Preto\",
+    \"km\": 18000,
+    \"cambio\": \"automatico\",
+    \"combustivel\": \"flex\"
+}"
+</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+let body = {
+    "placa": "ABC1D23",
+    "chassi": "9BWZZZ377VT004251",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "versao": "XEi 2.0",
+    "valor_venda": 134900,
+    "cor": "Preto",
+    "km": 18000,
+    "cambio": "automatico",
+    "combustivel": "flex"
+};
+
+fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body),
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PUTapi-vehicles--vehicle_id-">
+            <blockquote>
+            <p>Resposta de exemplo (200, Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 77,
+        &quot;placa&quot;: &quot;GZM0A04&quot;,
+        &quot;chassi&quot;: &quot;IYVDLJNIKHW000004&quot;,
+        &quot;marca&quot;: &quot;Ford&quot;,
+        &quot;modelo&quot;: &quot;Cronos&quot;,
+        &quot;versao&quot;: &quot;Comfortline&quot;,
+        &quot;valor_venda&quot;: &quot;54132.38&quot;,
+        &quot;cor&quot;: &quot;navy&quot;,
+        &quot;km&quot;: 237248,
+        &quot;cambio&quot;: &quot;manual&quot;,
+        &quot;combustivel&quot;: &quot;gasolina&quot;,
+        &quot;user_id&quot;: 135,
+        &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+        &quot;creator&quot;: null,
+        &quot;updater&quot;: null,
+        &quot;images&quot;: [
+            {
+                &quot;id&quot;: 57,
+                &quot;path&quot;: &quot;vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg&quot;,
+                &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg&quot;,
+                &quot;is_cover&quot;: false,
+                &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+                &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+            }
+        ]
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (403, Usuário autenticado não é o dono do veículo nem `is_admin`.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Forbidden&quot;,
+    &quot;status&quot;: 403,
+    &quot;detail&quot;: &quot;This action is unauthorized.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/999&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (422):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unprocessable Content&quot;,
+    &quot;status&quot;: 422,
+    &quot;detail&quot;: &quot;The placa has already been taken.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1&quot;,
+    &quot;errors&quot;: {
+        &quot;placa&quot;: [
+            &quot;J&aacute; existe um ve&iacute;culo cadastrado com essa placa.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-PUTapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-PUTapi-vehicles--vehicle_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PUTapi-vehicles--vehicle_id-"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PUTapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-PUTapi-vehicles--vehicle_id-">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-PUTapi-vehicles--vehicle_id-" data-method="PUT"
+      data-path="api/vehicles/{vehicle_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PUTapi-vehicles--vehicle_id-', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PUTapi-vehicles--vehicle_id-"
+                    onclick="tryItOut('PUTapi-vehicles--vehicle_id-');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PUTapi-vehicles--vehicle_id-"
+                    onclick="cancelTryOut('PUTapi-vehicles--vehicle_id-');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PUTapi-vehicles--vehicle_id-"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-darkblue">PUT</small>
+            <b><code>api/vehicles/{vehicle_id}</code></b>
+        </p>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/vehicles/{vehicle_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>placa</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="placa"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="ABC1D23"
+               data-component="body">
+    <br>
+<p>Placa única (formato Mercosul ou tradicional). Example: <code>ABC1D23</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>chassi</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="chassi"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="9BWZZZ377VT004251"
+               data-component="body">
+    <br>
+<p>Chassi único, exatamente 17 caracteres alfanuméricos (VIN). Example: <code>9BWZZZ377VT004251</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>marca</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="marca"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="Toyota"
+               data-component="body">
+    <br>
+<p>Marca do veículo. Example: <code>Toyota</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>modelo</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="modelo"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="Corolla"
+               data-component="body">
+    <br>
+<p>Modelo do veículo. Example: <code>Corolla</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>versao</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="versao"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="XEi 2.0"
+               data-component="body">
+    <br>
+<p>Versão/trim do veículo. Example: <code>XEi 2.0</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>valor_venda</code></b>&nbsp;&nbsp;
+<small>number</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="valor_venda"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="134900"
+               data-component="body">
+    <br>
+<p>Valor de venda em reais, mínimo 0.01. Example: <code>134900</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cor</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="cor"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="Preto"
+               data-component="body">
+    <br>
+<p>Cor do veículo. Example: <code>Preto</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>km</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="km"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="18000"
+               data-component="body">
+    <br>
+<p>Quilometragem, inteiro não negativo. Example: <code>18000</code></p>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>cambio</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="cambio"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="automatico"
+               data-component="body">
+    <br>
+<p>Tipo de câmbio. Example: <code>automatico</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>manual</code></li> <li><code>automatico</code></li></ul>
+        </div>
+                <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>combustivel</code></b>&nbsp;&nbsp;
+<small>string</small>&nbsp;
+<i>optional</i> &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="combustivel"                data-endpoint="PUTapi-vehicles--vehicle_id-"
+               value="flex"
+               data-component="body">
+    <br>
+<p>Tipo de combustível. Example: <code>flex</code></p>
+Must be one of:
+<ul style="list-style-type: square;"><li><code>gasolina</code></li> <li><code>alcool</code></li> <li><code>flex</code></li> <li><code>diesel</code></li> <li><code>hibrido</code></li> <li><code>eletrico</code></li></ul>
+        </div>
+        </form>
+
+                    <h2 id="vehicles-DELETEapi-vehicles--vehicle_id-">Excluir um veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>vehicle_images.vehicle_id</code> é <code>cascadeOnDelete()</code> a nível de PostgreSQL puro, então as
+linhas de <code>VehicleImage</code> somem automaticamente junto com o veículo — mas esse cascade
+nunca dispara um evento Eloquent, então <code>VehicleImageService::deleteAllForVehicle()</code> é
+chamado, dentro da mesma transação, para também limpar os arquivos físicos do disco
+público (adiado até depois do commit, para um rollback nunca deixar o veículo
+removido mas seus arquivos de imagem ainda no disco, ou vice-versa).</p>
+
+<span id="example-requests-DELETEapi-vehicles--vehicle_id-">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost:8000/api/vehicles/1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-vehicles--vehicle_id-">
+            <blockquote>
+            <p>Resposta de exemplo (204, Veículo (e suas imagens, no banco e no storage) excluído com sucesso.):</p>
+        </blockquote>
+                <pre>
+<code>Resposta vazia</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (403):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Forbidden&quot;,
+    &quot;status&quot;: 403,
+    &quot;detail&quot;: &quot;This action is unauthorized.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/999&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-DELETEapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-DELETEapi-vehicles--vehicle_id-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-vehicles--vehicle_id-"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-vehicles--vehicle_id-" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-vehicles--vehicle_id-">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-DELETEapi-vehicles--vehicle_id-" data-method="DELETE"
+      data-path="api/vehicles/{vehicle_id}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-vehicles--vehicle_id-', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-vehicles--vehicle_id-"
+                    onclick="tryItOut('DELETEapi-vehicles--vehicle_id-');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-vehicles--vehicle_id-"
+                    onclick="cancelTryOut('DELETEapi-vehicles--vehicle_id-');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-vehicles--vehicle_id-"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/vehicles/{vehicle_id}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-vehicles--vehicle_id-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="DELETEapi-vehicles--vehicle_id-"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                    </form>
+
+                <h1 id="images">Images</h1>
+
+    <p>Upload e gestão de imagens de um veículo, incluindo a capa única (<code>is_cover</code>). Assim como <code>update</code>/<code>delete</code> de veículos, apenas o dono do veículo ou um usuário <code>is_admin</code> pode gerenciar suas imagens.</p>
+
+                                <h2 id="images-POSTapi-vehicles--vehicle_id--images">Enviar uma ou mais imagens para um veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>VehiclePolicy::manageImages</code> restringe isto do mesmo jeito que <code>update</code>/<code>delete</code> já
+restringem suas próprias ações: só o dono do veículo ou um usuário <code>is_admin</code> pode
+adicionar imagens a ele.</p>
+
+<span id="example-requests-POSTapi-vehicles--vehicle_id--images">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request POST \
+    "http://localhost:8000/api/vehicles/1/images" \
+    --header "Content-Type: multipart/form-data" \
+    --header "Accept: application/json" \
+    --form "files[]=@/tmp/phpruot21jhb4671IKiejo" </code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1/images"
+);
+
+const headers = {
+    "Content-Type": "multipart/form-data",
+    "Accept": "application/json",
+};
+
+const body = new FormData();
+body.append('files[]', document.querySelector('input[name="files[]"]').files[0]);
+
+fetch(url, {
+    method: "POST",
+    headers,
+    body,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-POSTapi-vehicles--vehicle_id--images">
+            <blockquote>
+            <p>Resposta de exemplo (201, Imagens criadas. A primeira imagem já enviada para um veículo é automaticamente marcada como `is_cover`.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 58,
+            &quot;path&quot;: &quot;vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg&quot;,
+            &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg&quot;,
+            &quot;is_cover&quot;: false,
+            &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+        },
+        {
+            &quot;id&quot;: 59,
+            &quot;path&quot;: &quot;vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg&quot;,
+            &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg&quot;,
+            &quot;is_cover&quot;: false,
+            &quot;created_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;,
+            &quot;updated_at&quot;: &quot;2026-08-07T01:44:53.000000Z&quot;
+        }
+    ]
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (403):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Forbidden&quot;,
+    &quot;status&quot;: 403,
+    &quot;detail&quot;: &quot;This action is unauthorized.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/999/images&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (422):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Unprocessable Content&quot;,
+    &quot;status&quot;: 422,
+    &quot;detail&quot;: &quot;Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images&quot;,
+    &quot;errors&quot;: {
+        &quot;files.0&quot;: [
+            &quot;Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.&quot;
+        ]
+    }
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-POSTapi-vehicles--vehicle_id--images" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-POSTapi-vehicles--vehicle_id--images"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-POSTapi-vehicles--vehicle_id--images"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-POSTapi-vehicles--vehicle_id--images" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-POSTapi-vehicles--vehicle_id--images">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-POSTapi-vehicles--vehicle_id--images" data-method="POST"
+      data-path="api/vehicles/{vehicle_id}/images"
+      data-authed="1"
+      data-hasfiles="1"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('POSTapi-vehicles--vehicle_id--images', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-POSTapi-vehicles--vehicle_id--images"
+                    onclick="tryItOut('POSTapi-vehicles--vehicle_id--images');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-POSTapi-vehicles--vehicle_id--images"
+                    onclick="cancelTryOut('POSTapi-vehicles--vehicle_id--images');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-POSTapi-vehicles--vehicle_id--images"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-black">POST</small>
+            <b><code>api/vehicles/{vehicle_id}/images</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="POSTapi-vehicles--vehicle_id--images"
+               value="multipart/form-data"
+               data-component="header">
+    <br>
+<p>Example: <code>multipart/form-data</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="POSTapi-vehicles--vehicle_id--images"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="POSTapi-vehicles--vehicle_id--images"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                            <h4 class="fancy-heading-panel"><b>Parâmetros do corpo</b></h4>
+        <div style=" padding-left: 28px;  clear: unset;">
+            <b style="line-height: 2;"><code>files</code></b>&nbsp;&nbsp;
+<small>file[]</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="file" style="display: none"
+                              name="files[0]"                data-endpoint="POSTapi-vehicles--vehicle_id--images"
+               data-component="body">
+        <input type="file" style="display: none"
+               name="files[1]"                data-endpoint="POSTapi-vehicles--vehicle_id--images"
+               data-component="body">
+    <br>
+<p>Um ou mais arquivos de imagem (jpeg, jpg, png, gif ou webp; até 2MB cada). Enviado como multipart/form-data.</p>
+        </div>
+        </form>
+
+                    <h2 id="images-PATCHapi-vehicles--vehicle_id--images--imageId--cover">Definir a capa de um veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p><code>{imageId}</code> é resolvido manualmente (query com escopo por <code>vehicle_id</code> + <code>findOrFail</code>)
+em vez de nested route-model binding implícito: o binding aninhado precisaria que
+<code>{vehicle}</code> e <code>{image}</code> estivessem relacionados por um relationship Eloquent nomeado
+batendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente
+checar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar
+404, não 403), então isso fica explícito. <code>findOrFail</code> lança <code>ModelNotFoundException</code>,
+que o exception handler em <code>bootstrap/app.php</code> já reescreve como 404
+<code>application/problem+json</code> — nada extra é necessário aqui, seja pra "veículo errado"
+ou "imagem inexistente".</p>
+
+<span id="example-requests-PATCHapi-vehicles--vehicle_id--images--imageId--cover">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request PATCH \
+    "http://localhost:8000/api/vehicles/1/images/1/cover" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1/images/1/cover"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "PATCH",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-PATCHapi-vehicles--vehicle_id--images--imageId--cover">
+            <blockquote>
+            <p>Resposta de exemplo (200, Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste veículo deixa de sê-lo, de forma transacional.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;data&quot;: {
+        &quot;id&quot;: 60,
+        &quot;path&quot;: &quot;vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg&quot;,
+        &quot;url&quot;: &quot;http://localhost:8000/storage/vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg&quot;,
+        &quot;is_cover&quot;: false,
+        &quot;created_at&quot;: &quot;2026-08-07T01:44:54.000000Z&quot;,
+        &quot;updated_at&quot;: &quot;2026-08-07T01:44:54.000000Z&quot;
+    }
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (403):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Forbidden&quot;,
+    &quot;status&quot;: 403,
+    &quot;detail&quot;: &quot;This action is unauthorized.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images/1/cover&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404, Também retornado quando a imagem existe mas pertence a outro veículo.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images/999/cover&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-PATCHapi-vehicles--vehicle_id--images--imageId--cover" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-PATCHapi-vehicles--vehicle_id--images--imageId--cover"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-PATCHapi-vehicles--vehicle_id--images--imageId--cover" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-PATCHapi-vehicles--vehicle_id--images--imageId--cover">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-PATCHapi-vehicles--vehicle_id--images--imageId--cover" data-method="PATCH"
+      data-path="api/vehicles/{vehicle_id}/images/{imageId}/cover"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('PATCHapi-vehicles--vehicle_id--images--imageId--cover', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+                    onclick="tryItOut('PATCHapi-vehicles--vehicle_id--images--imageId--cover');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+                    onclick="cancelTryOut('PATCHapi-vehicles--vehicle_id--images--imageId--cover');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-purple">PATCH</small>
+            <b><code>api/vehicles/{vehicle_id}/images/{imageId}/cover</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>imageId</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="imageId"                data-endpoint="PATCHapi-vehicles--vehicle_id--images--imageId--cover"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id da imagem (deve pertencer ao veículo informado). Example: <code>1</code></p>
+            </div>
+                    </form>
+
+                    <h2 id="images-DELETEapi-vehicles--vehicle_id--images--imageId-">Excluir uma imagem de um veículo</h2>
+
+<p>
+<small class="badge badge-darkred">requires authentication</small>
+</p>
+
+<p>A imagem é buscada através de <code>$vehicle-&gt;images()</code> em vez de um <code>VehicleImage::findOrFail()</code>
+global (ou binding implícito de rota em <code>{imageId}</code>): isso garante que uma imagem
+pertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de
+vazar um 403 (ou ter sucesso) para um id que é real mas não é "deste veículo".</p>
+
+<span id="example-requests-DELETEapi-vehicles--vehicle_id--images--imageId-">
+<blockquote>Requisição de exemplo:</blockquote>
+
+
+<div class="bash-example">
+    <pre><code class="language-bash">curl --request DELETE \
+    "http://localhost:8000/api/vehicles/1/images/1" \
+    --header "Content-Type: application/json" \
+    --header "Accept: application/json"</code></pre></div>
+
+
+<div class="javascript-example">
+    <pre><code class="language-javascript">const url = new URL(
+    "http://localhost:8000/api/vehicles/1/images/1"
+);
+
+const headers = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+};
+
+
+fetch(url, {
+    method: "DELETE",
+    headers,
+}).then(response =&gt; response.json());</code></pre></div>
+
+</span>
+
+<span id="example-responses-DELETEapi-vehicles--vehicle_id--images--imageId-">
+            <blockquote>
+            <p>Resposta de exemplo (204, Imagem excluída do banco e o arquivo físico removido do storage.):</p>
+        </blockquote>
+                <pre>
+<code>Resposta vazia</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (403):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Forbidden&quot;,
+    &quot;status&quot;: 403,
+    &quot;detail&quot;: &quot;This action is unauthorized.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images/1&quot;
+}</code>
+ </pre>
+            <blockquote>
+            <p>Resposta de exemplo (404, Também retornado quando a imagem existe mas pertence a outro veículo.):</p>
+        </blockquote>
+                <pre>
+
+<code class="language-json" style="max-height: 300px;">{
+    &quot;type&quot;: &quot;about:blank&quot;,
+    &quot;title&quot;: &quot;Not Found&quot;,
+    &quot;status&quot;: 404,
+    &quot;detail&quot;: &quot;O recurso solicitado n&atilde;o foi encontrado.&quot;,
+    &quot;instance&quot;: &quot;/api/vehicles/1/images/999&quot;
+}</code>
+ </pre>
+    </span>
+<span id="execution-results-DELETEapi-vehicles--vehicle_id--images--imageId-" hidden>
+    <blockquote>Resposta recebida<span
+                id="execution-response-status-DELETEapi-vehicles--vehicle_id--images--imageId-"></span>:
+    </blockquote>
+    <pre class="json"><code id="execution-response-content-DELETEapi-vehicles--vehicle_id--images--imageId-"
+      data-empty-response-text="<Resposta vazia>" style="max-height: 400px;"></code></pre>
+</span>
+<span id="execution-error-DELETEapi-vehicles--vehicle_id--images--imageId-" hidden>
+    <blockquote>Requisição falhou com erro:</blockquote>
+    <pre><code id="execution-error-message-DELETEapi-vehicles--vehicle_id--images--imageId-">
+
+Dica: verifique se você está corretamente conectado à rede.
+Se você é responsável por esta API, confirme que ela está rodando e que o CORS está habilitado.
+Você pode checar o console do Dev Tools para informações de depuração.</code></pre>
+</span>
+<form id="form-DELETEapi-vehicles--vehicle_id--images--imageId-" data-method="DELETE"
+      data-path="api/vehicles/{vehicle_id}/images/{imageId}"
+      data-authed="1"
+      data-hasfiles="0"
+      data-isarraybody="0"
+      autocomplete="off"
+      onsubmit="event.preventDefault(); executeTryOut('DELETEapi-vehicles--vehicle_id--images--imageId-', this);">
+    <h3>
+        Requisição&nbsp;&nbsp;&nbsp;
+                    <button type="button"
+                    style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-tryout-DELETEapi-vehicles--vehicle_id--images--imageId-"
+                    onclick="tryItOut('DELETEapi-vehicles--vehicle_id--images--imageId-');">Testar agora ⚡
+            </button>
+            <button type="button"
+                    style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-canceltryout-DELETEapi-vehicles--vehicle_id--images--imageId-"
+                    onclick="cancelTryOut('DELETEapi-vehicles--vehicle_id--images--imageId-');" hidden>Cancelar 🛑
+            </button>&nbsp;&nbsp;
+            <button type="submit"
+                    style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;"
+                    id="btn-executetryout-DELETEapi-vehicles--vehicle_id--images--imageId-"
+                    data-initial-text="Enviar requisição 💥"
+                    data-loading-text="⏱ Enviando..."
+                    hidden>Enviar requisição 💥
+            </button>
+            </h3>
+            <p>
+            <small class="badge badge-red">DELETE</small>
+            <b><code>api/vehicles/{vehicle_id}/images/{imageId}</code></b>
+        </p>
+                <h4 class="fancy-heading-panel"><b>Cabeçalhos</b></h4>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Content-Type"                data-endpoint="DELETEapi-vehicles--vehicle_id--images--imageId-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                                <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>Accept</code></b>&nbsp;&nbsp;
+&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="text" style="display: none"
+                              name="Accept"                data-endpoint="DELETEapi-vehicles--vehicle_id--images--imageId-"
+               value="application/json"
+               data-component="header">
+    <br>
+<p>Example: <code>application/json</code></p>
+            </div>
+                        <h4 class="fancy-heading-panel"><b>Parâmetros de URL</b></h4>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>vehicle_id</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="vehicle_id"                data-endpoint="DELETEapi-vehicles--vehicle_id--images--imageId-"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id do veículo. Example: <code>1</code></p>
+            </div>
+                    <div style="padding-left: 28px; clear: unset;">
+                <b style="line-height: 2;"><code>imageId</code></b>&nbsp;&nbsp;
+<small>integer</small>&nbsp;
+ &nbsp;
+ &nbsp;
+                <input type="number" style="display: none"
+               step="any"               name="imageId"                data-endpoint="DELETEapi-vehicles--vehicle_id--images--imageId-"
+               value="1"
+               data-component="url">
+    <br>
+<p>Id da imagem (deve pertencer ao veículo informado). Example: <code>1</code></p>
+            </div>
+                    </form>
+
+            
+
+        
+    </div>
+    <div class="dark-box">
+                    <div class="lang-selector">
+                                                        <button type="button" class="lang-button" data-language-name="bash">bash</button>
+                                                        <button type="button" class="lang-button" data-language-name="javascript">javascript</button>
+                            </div>
+            </div>
+</div>
+</body>
+</html>

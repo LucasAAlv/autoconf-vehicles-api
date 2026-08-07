@@ -1,0 +1,246 @@
+name: Images
+description: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/vehicles/{vehicle_id}/images'
+    metadata:
+      custom: []
+      groupName: Images
+      groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Enviar uma ou mais imagens para um veículo'
+      description: |-
+        `VehiclePolicy::manageImages` restringe isto do mesmo jeito que `update`/`delete` já
+        restringem suas próprias ações: só o dono do veículo ou um usuário `is_admin` pode
+        adicionar imagens a ele.
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      files:
+        custom: []
+        name: files
+        description: 'Um ou mais arquivos de imagem (jpeg, jpg, png, gif ou webp; até 2MB cada). Enviado como multipart/form-data.'
+        required: true
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      files:
+        - null
+    responses:
+      -
+        custom: []
+        status: 201
+        content: '{"data":[{"id":58,"path":"vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/169\/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"},{"id":59,"path":"vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/247\/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg","is_cover":false,"created_at":"2026-08-07T01:44:53.000000Z","updated_at":"2026-08-07T01:44:53.000000Z"}]}'
+        headers: []
+        description: 'Imagens criadas. A primeira imagem já enviada para um veículo é automaticamente marcada como `is_cover`.'
+      -
+        custom: []
+        status: 403
+        content: '{"type":"about:blank","title":"Forbidden","status":403,"detail":"This action is unauthorized.","instance":"\/api\/vehicles\/1\/images"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/999\/images"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 422
+        content: '{"type":"about:blank","title":"Unprocessable Content","status":422,"detail":"Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.","instance":"\/api\/vehicles\/1\/images","errors":{"files.0":["Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp."]}}'
+        headers: []
+        description: ''
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PATCH
+    uri: 'api/vehicles/{vehicle_id}/images/{imageId}/cover'
+    metadata:
+      custom: []
+      groupName: Images
+      groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Definir a capa de um veículo'
+      description: |-
+        `{imageId}` é resolvido manualmente (query com escopo por `vehicle_id` + `findOrFail`)
+        em vez de nested route-model binding implícito: o binding aninhado precisaria que
+        `{vehicle}` e `{image}` estivessem relacionados por um relationship Eloquent nomeado
+        batendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente
+        checar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar
+        404, não 403), então isso fica explícito. `findOrFail` lança `ModelNotFoundException`,
+        que o exception handler em `bootstrap/app.php` já reescreve como 404
+        `application/problem+json` — nada extra é necessário aqui, seja pra "veículo errado"
+        ou "imagem inexistente".
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      imageId:
+        custom: []
+        name: imageId
+        description: 'Id da imagem (deve pertencer ao veículo informado).'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+      imageId: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"data":{"id":60,"path":"vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","url":"http:\/\/localhost:8000\/storage\/vehicles\/760\/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg","is_cover":false,"created_at":"2026-08-07T01:44:54.000000Z","updated_at":"2026-08-07T01:44:54.000000Z"}}'
+        headers: []
+        description: 'Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste veículo deixa de sê-lo, de forma transacional.'
+      -
+        custom: []
+        status: 403
+        content: '{"type":"about:blank","title":"Forbidden","status":403,"detail":"This action is unauthorized.","instance":"\/api\/vehicles\/1\/images\/1\/cover"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/1\/images\/999\/cover"}'
+        headers: []
+        description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/vehicles/{vehicle_id}/images/{imageId}'
+    metadata:
+      custom: []
+      groupName: Images
+      groupDescription: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Excluir uma imagem de um veículo'
+      description: |-
+        A imagem é buscada através de `$vehicle->images()` em vez de um `VehicleImage::findOrFail()`
+        global (ou binding implícito de rota em `{imageId}`): isso garante que uma imagem
+        pertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de
+        vazar um 403 (ou ter sucesso) para um id que é real mas não é "deste veículo".
+      authenticated: true
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      vehicle_id:
+        custom: []
+        name: vehicle_id
+        description: 'Id do veículo.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      imageId:
+        custom: []
+        name: imageId
+        description: 'Id da imagem (deve pertencer ao veículo informado).'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      vehicle_id: 1
+      imageId: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 204
+        content: ''
+        headers: []
+        description: 'Imagem excluída do banco e o arquivo físico removido do storage.'
+      -
+        custom: []
+        status: 403
+        content: '{"type":"about:blank","title":"Forbidden","status":403,"detail":"This action is unauthorized.","instance":"\/api\/vehicles\/1\/images\/1"}'
+        headers: []
+        description: ''
+      -
+        custom: []
+        status: 404
+        content: '{"type":"about:blank","title":"Not Found","status":404,"detail":"O recurso solicitado n\u00e3o foi encontrado.","instance":"\/api\/vehicles\/1\/images\/999"}'
+        headers: []
+        description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

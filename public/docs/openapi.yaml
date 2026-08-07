@@ -1,0 +1,1894 @@
+openapi: 3.0.3
+info:
+  title: 'Documentação da API Autoconf Vehicles'
+  description: 'API para um SaaS multiusuário de gestão de veículos: autenticação, cadastro de veículos e gestão de imagens com capa única.'
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8000'
+tags:
+  - name: Auth
+    description: "Registro, login, logout e o usuário autenticado atual. Esta API é uma **SPA\nSanctum**: um `login` bem-sucedido (ou `register` seguido de `login`) define um\ncookie de sessão `HttpOnly`, e toda requisição autenticada subsequente precisa\ncarregar um header `X-XSRF-TOKEN` válido, obtido a partir do cookie `XSRF-TOKEN`\nentregue por `GET /sanctum/csrf-cookie` — veja a seção \"Authentication\" acima."
+  - name: Vehicles
+    description: 'CRUD de veículos. Qualquer usuário autenticado pode listar/visualizar qualquer veículo; apenas o dono (`user_id`) ou um usuário `is_admin` pode atualizar ou excluir.'
+  - name: Images
+    description: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.'
+paths:
+  /api/auth/register:
+    post:
+      summary: 'Criar uma nova conta de usuário'
+      operationId: criarUmaNovaContaDeUsurio
+      description: "Isso não inicia também uma sessão autenticada: registro e login são mantidos como dois\npassos separados e explícitos, seguindo o contrato simples que `POST /auth/register`\npromete. `User::create()` só recebe os campos já validados da requisição, então um\npayload que também envie `is_admin` (ou qualquer outro atributo) não tem como\ninfluenciar o registro criado."
+      parameters: []
+      responses:
+        201:
+          description: 'Conta criada com sucesso. Note que isso não autentica o usuário — é necessário chamar `POST /auth/login` em seguida.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  name: 'Maria Souza'
+                  email: maria.souza@example.com
+                  created_at: '2026-08-06T12:00:00.000000Z'
+                  updated_at: '2026-08-06T12:00:00.000000Z'
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: 'Maria Souza'
+                  email:
+                    type: string
+                    example: maria.souza@example.com
+                  created_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+                  updated_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+        422:
+          description: 'Payload inválido — e-mail já cadastrado, senha e confirmação não coincidem, ou campo obrigatório ausente.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Unprocessable Content'
+                  status: 422
+                  detail: 'Já existe uma conta cadastrada com esse e-mail. (and 1 more error)'
+                  instance: /api/auth/register
+                  errors:
+                    email:
+                      - 'Já existe uma conta cadastrada com esse e-mail.'
+                    password:
+                      - 'A confirmação de senha não corresponde.'
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Unprocessable Content'
+                  status:
+                    type: integer
+                    example: 422
+                  detail:
+                    type: string
+                    example: 'Já existe uma conta cadastrada com esse e-mail. (and 1 more error)'
+                  instance:
+                    type: string
+                    example: /api/auth/register
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        example:
+                          - 'Já existe uma conta cadastrada com esse e-mail.'
+                        items:
+                          type: string
+                      password:
+                        type: array
+                        example:
+                          - 'A confirmação de senha não corresponde.'
+                        items:
+                          type: string
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Nome completo do usuário.'
+                  example: 'Maria Souza'
+                email:
+                  type: string
+                  description: 'E-mail único do usuário.'
+                  example: maria.souza@example.com
+                password:
+                  type: string
+                  description: 'Senha do usuário, sujeita às regras padrão de senha do Laravel.'
+                  example: Str0ng!Passw0rd
+                password_confirmation:
+                  type: string
+                  description: 'Deve ser idêntica a `password`.'
+                  example: Str0ng!Passw0rd
+              required:
+                - name
+                - email
+                - password
+                - password_confirmation
+      security: []
+  /api/auth/login:
+    post:
+      summary: 'Autenticar um usuário para a sessão stateful da SPA'
+      operationId: autenticarUmUsurioParaASessoStatefulDaSPA
+      description: "`ValidationException::withMessages()` numa tentativa malsucedida é deliberado, não só\nconveniente: o exception renderer desta aplicação já transforma qualquer\n`ValidationException` no mesmo envelope `application/problem+json` 422 usado pela\nvalidação de Form Request, então uma falha de credenciais parece idêntica a qualquer\noutra falha de validação para quem consome a API, sem o controller precisar montar\nessa resposta manualmente."
+      parameters: []
+      responses:
+        200:
+          description: 'Login bem-sucedido. A resposta carrega o cookie de sessão `HttpOnly`; o corpo é o usuário autenticado.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  name: 'Maria Souza'
+                  email: maria.souza@example.com
+                  created_at: '2026-08-06T12:00:00.000000Z'
+                  updated_at: '2026-08-06T12:00:00.000000Z'
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: 'Maria Souza'
+                  email:
+                    type: string
+                    example: maria.souza@example.com
+                  created_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+                  updated_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+        422:
+          description: 'Credenciais inválidas. Mesmo formato `application/problem+json` usado por qualquer outra falha de validação (422).'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Unprocessable Content'
+                  status: 422
+                  detail: 'Essas credenciais não correspondem aos nossos registros.'
+                  instance: /api/auth/login
+                  errors:
+                    email:
+                      - 'Essas credenciais não correspondem aos nossos registros.'
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Unprocessable Content'
+                  status:
+                    type: integer
+                    example: 422
+                  detail:
+                    type: string
+                    example: 'Essas credenciais não correspondem aos nossos registros.'
+                  instance:
+                    type: string
+                    example: /api/auth/login
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        example:
+                          - 'Essas credenciais não correspondem aos nossos registros.'
+                        items:
+                          type: string
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'E-mail cadastrado.'
+                  example: maria.souza@example.com
+                password:
+                  type: string
+                  description: 'Senha da conta.'
+                  example: Str0ng!Passw0rd
+              required:
+                - email
+                - password
+      security: []
+  /api/auth/me:
+    get:
+      summary: 'Retornar o usuário autenticado atual'
+      operationId: retornarOUsurioAutenticadoAtual
+      description: "Esta rota fica atrás de `auth:sanctum`, então um visitante não autenticado nunca chega\na este método: o próprio guard do Sanctum lança `AuthenticationException` antes, que o\nexception renderer da aplicação já transforma num 401 `application/problem+json`\n(configurado em `bootstrap/app.php`)."
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  name: 'Maria Souza'
+                  email: maria.souza@example.com
+                  created_at: '2026-08-06T12:00:00.000000Z'
+                  updated_at: '2026-08-06T12:00:00.000000Z'
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: 'Maria Souza'
+                  email:
+                    type: string
+                    example: maria.souza@example.com
+                  created_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+                  updated_at:
+                    type: string
+                    example: '2026-08-06T12:00:00.000000Z'
+        401:
+          description: 'Nenhuma sessão válida (cookie ausente/expirado, ou `X-XSRF-TOKEN` ausente/incorreto).'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Unauthorized
+                  status: 401
+                  detail: Unauthenticated.
+                  instance: /api/auth/me
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Unauthorized
+                  status:
+                    type: integer
+                    example: 401
+                  detail:
+                    type: string
+                    example: Unauthenticated.
+                  instance:
+                    type: string
+                    example: /api/auth/me
+      tags:
+        - Auth
+  /api/auth/logout:
+    post:
+      summary: 'Encerrar a sessão autenticada da SPA'
+      operationId: encerrarASessoAutenticadaDaSPA
+      description: "Os três passos espelham o cuidado que `login()` já tem com sessões, na ordem inversa:\ndesloga o guard, destrói os dados da sessão e gira o token CSRF, então nem o id de\nsessão nem o token CSRF que um atacante tenha observado antes do logout continuam\nválidos depois. `204 No Content` é usado em vez de `200` porque não há representação\nalguma pra devolver num logout."
+      parameters: []
+      responses:
+        204:
+          description: 'Sessão, dados de sessão e token CSRF invalidados com sucesso.'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Unauthorized
+                  status: 401
+                  detail: Unauthenticated.
+                  instance: /api/auth/logout
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Unauthorized
+                  status:
+                    type: integer
+                    example: 401
+                  detail:
+                    type: string
+                    example: Unauthenticated.
+                  instance:
+                    type: string
+                    example: /api/auth/logout
+      tags:
+        - Auth
+  /api/vehicles:
+    get:
+      summary: 'Listar veículos, paginado'
+      operationId: listarVeculosPaginado
+      description: "`VehiclePolicy::viewAny` já permite qualquer usuário autenticado, então isto lista\ntodos os veículos do sistema, não só os do próprio usuário — consistente com `show()`,\nque também não restringe por posse. Ao contrário de `show()`/`store()`/`update()`, esta\nlistagem nunca carrega `creator`/`updater`/`images` — busque `GET /vehicles/{vehicle}`\npara o formato completo."
+      parameters:
+        -
+          in: query
+          name: q
+          description: 'Busca livre (placa, chassi, marca, modelo ou versão).'
+          example: Corolla
+          required: false
+          schema:
+            type: string
+            description: 'Busca livre (placa, chassi, marca, modelo ou versão).'
+            example: Corolla
+        -
+          in: query
+          name: marca
+          description: 'Filtra por marca exata.'
+          example: Toyota
+          required: false
+          schema:
+            type: string
+            description: 'Filtra por marca exata.'
+            example: Toyota
+        -
+          in: query
+          name: modelo
+          description: 'Filtra por modelo exato.'
+          example: Corolla
+          required: false
+          schema:
+            type: string
+            description: 'Filtra por modelo exato.'
+            example: Corolla
+        -
+          in: query
+          name: placa
+          description: 'Filtra por placa exata.'
+          example: ABC1D23
+          required: false
+          schema:
+            type: string
+            description: 'Filtra por placa exata.'
+            example: ABC1D23
+        -
+          in: query
+          name: sort
+          description: 'Lista separada por vírgulas de campos ordenáveis (`km`, `valor_venda`, `marca`, `modelo`, `created_at`), cada um opcionalmente prefixado com `-` para ordem decrescente.'
+          example: 'km,-valor_venda'
+          required: false
+          schema:
+            type: string
+            description: 'Lista separada por vírgulas de campos ordenáveis (`km`, `valor_venda`, `marca`, `modelo`, `created_at`), cada um opcionalmente prefixado com `-` para ordem decrescente.'
+            example: 'km,-valor_venda'
+        -
+          in: query
+          name: page
+          description: 'Número da página (1-indexado).'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Número da página (1-indexado).'
+            example: 1
+        -
+          in: query
+          name: per_page
+          description: 'Itens por página (padrão 15, máximo 100 — valores maiores são reduzidos ao limite).'
+          example: 15
+          required: false
+          schema:
+            type: integer
+            description: 'Itens por página (padrão 15, máximo 100 — valores maiores são reduzidos ao limite).'
+            example: 15
+      responses:
+        200:
+          description: 'Página de veículos. `creator`/`updater`/`images` não são carregados nesta listagem.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 73
+                      placa: NGZ0A00
+                      chassi: MIYVDLJNIKH000000
+                      marca: Chevrolet
+                      modelo: Kicks
+                      versao: '1.6 Turbo'
+                      valor_venda: '152854.40'
+                      cor: fuchsia
+                      km: 208376
+                      cambio: manual
+                      combustivel: gasolina
+                      user_id: 127
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
+                    -
+                      id: 74
+                      placa: SIT0A01
+                      chassi: CPSCQLDZSNR000001
+                      marca: Honda
+                      modelo: Corolla
+                      versao: Titanium
+                      valor_venda: '174593.24'
+                      cor: teal
+                      km: 138484
+                      cambio: automatico
+                      combustivel: diesel
+                      user_id: 128
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
+                  links:
+                    first: '/?page=1'
+                    last: '/?page=1'
+                    prev: null
+                    next: null
+                  meta:
+                    current_page: 1
+                    from: 1
+                    last_page: 1
+                    links:
+                      -
+                        url: null
+                        label: '&laquo; Previous'
+                        page: null
+                        active: false
+                      -
+                        url: '/?page=1'
+                        label: '1'
+                        page: 1
+                        active: true
+                      -
+                        url: null
+                        label: 'Next &raquo;'
+                        page: null
+                        active: false
+                    path: /
+                    per_page: 15
+                    to: 2
+                    total: 2
+                properties:
+                  data:
+                    type: array
+                    example:
+                      - id: 73
+                        placa: NGZ0A00
+                        chassi: MIYVDLJNIKH000000
+                        marca: Chevrolet
+                        modelo: Kicks
+                        versao: '1.6 Turbo'
+                        valor_venda: '152854.40'
+                        cor: fuchsia
+                        km: 208376
+                        cambio: manual
+                        combustivel: gasolina
+                        user_id: 127
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                      - id: 74
+                        placa: SIT0A01
+                        chassi: CPSCQLDZSNR000001
+                        marca: Honda
+                        modelo: Corolla
+                        versao: Titanium
+                        valor_venda: '174593.24'
+                        cor: teal
+                        km: 138484
+                        cambio: automatico
+                        combustivel: diesel
+                        user_id: 128
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 73
+                        placa:
+                          type: string
+                          example: NGZ0A00
+                        chassi:
+                          type: string
+                          example: MIYVDLJNIKH000000
+                        marca:
+                          type: string
+                          example: Chevrolet
+                        modelo:
+                          type: string
+                          example: Kicks
+                        versao:
+                          type: string
+                          example: '1.6 Turbo'
+                        valor_venda:
+                          type: string
+                          example: '152854.40'
+                        cor:
+                          type: string
+                          example: fuchsia
+                        km:
+                          type: integer
+                          example: 208376
+                        cambio:
+                          type: string
+                          example: manual
+                        combustivel:
+                          type: string
+                          example: gasolina
+                        user_id:
+                          type: integer
+                          example: 127
+                        created_at:
+                          type: string
+                          example: '2026-08-07T01:44:53.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-08-07T01:44:53.000000Z'
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                        example: '/?page=1'
+                      last:
+                        type: string
+                        example: '/?page=1'
+                      prev:
+                        type: string
+                        example: null
+                        nullable: true
+                      next:
+                        type: string
+                        example: null
+                        nullable: true
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      links:
+                        type: array
+                        example:
+                          - url: null
+                            label: '&laquo; Previous'
+                            page: null
+                            active: false
+                          - url: '/?page=1'
+                            label: '1'
+                            page: 1
+                            active: true
+                          - url: null
+                            label: 'Next &raquo;'
+                            page: null
+                            active: false
+                        items:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              example: null
+                              nullable: true
+                            label:
+                              type: string
+                              example: '&laquo; Previous'
+                            page:
+                              type: string
+                              example: null
+                              nullable: true
+                            active:
+                              type: boolean
+                              example: false
+                      path:
+                        type: string
+                        example: /
+                      per_page:
+                        type: integer
+                        example: 15
+                      to:
+                        type: integer
+                        example: 2
+                      total:
+                        type: integer
+                        example: 2
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Unauthorized
+                  status: 401
+                  detail: Unauthenticated.
+                  instance: /api/vehicles
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Unauthorized
+                  status:
+                    type: integer
+                    example: 401
+                  detail:
+                    type: string
+                    example: Unauthenticated.
+                  instance:
+                    type: string
+                    example: /api/vehicles
+      tags:
+        - Vehicles
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 16
+                per_page:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 22
+                q:
+                  type: string
+                  description: ''
+                  example: architecto
+                marca:
+                  type: string
+                  description: ''
+                  example: architecto
+                modelo:
+                  type: string
+                  description: ''
+                  example: architecto
+                placa:
+                  type: string
+                  description: ''
+                  example: architecto
+                sort:
+                  type: string
+                  description: ''
+                  example: architecto
+    post:
+      summary: 'Criar um novo veículo'
+      operationId: criarUmNovoVeculo
+      description: "`user_id` não faz parte de `$request->validated()` — não é sequer um dado validado, é\natribuído diretamente a partir do usuário autenticado, então um cliente nunca consegue\ninfluenciá-lo incluindo-o no payload (`Vehicle::$fillable` também o exclui, como\nsegunda linha de defesa). `created_by`/`updated_by` são carimbados separadamente pelo\n`VehicleObserver` no evento `creating`."
+      parameters: []
+      responses:
+        201:
+          description: 'Veículo criado. `images` vem vazio logo após a criação; `creator`/`updater` refletem o usuário autenticado.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 75
+                    placa: GZM0A02
+                    chassi: IYVDLJNIKHW000002
+                    marca: Ford
+                    modelo: Cronos
+                    versao: Comfortline
+                    valor_venda: '54132.38'
+                    cor: navy
+                    km: 237248
+                    cambio: manual
+                    combustivel: gasolina
+                    user_id: 129
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
+                    creator: null
+                    updater: null
+                    images:
+                      -
+                        id: 55
+                        path: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
+                        url: 'http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg'
+                        is_cover: false
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 75
+                      placa:
+                        type: string
+                        example: GZM0A02
+                      chassi:
+                        type: string
+                        example: IYVDLJNIKHW000002
+                      marca:
+                        type: string
+                        example: Ford
+                      modelo:
+                        type: string
+                        example: Cronos
+                      versao:
+                        type: string
+                        example: Comfortline
+                      valor_venda:
+                        type: string
+                        example: '54132.38'
+                      cor:
+                        type: string
+                        example: navy
+                      km:
+                        type: integer
+                        example: 237248
+                      cambio:
+                        type: string
+                        example: manual
+                      combustivel:
+                        type: string
+                        example: gasolina
+                      user_id:
+                        type: integer
+                        example: 129
+                      created_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      creator:
+                        type: string
+                        example: null
+                        nullable: true
+                      updater:
+                        type: string
+                        example: null
+                        nullable: true
+                      images:
+                        type: array
+                        example:
+                          - id: 55
+                            path: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
+                            url: 'http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg'
+                            is_cover: false
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 55
+                            path:
+                              type: string
+                              example: vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg
+                            url:
+                              type: string
+                              example: 'http://localhost:8000/storage/vehicles/258/f2726f3d-9044-3663-bede-2a0f37053879.jpg'
+                            is_cover:
+                              type: boolean
+                              example: false
+                            created_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Unauthorized
+                  status: 401
+                  detail: Unauthenticated.
+                  instance: /api/vehicles
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Unauthorized
+                  status:
+                    type: integer
+                    example: 401
+                  detail:
+                    type: string
+                    example: Unauthenticated.
+                  instance:
+                    type: string
+                    example: /api/vehicles
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Unprocessable Content'
+                  status: 422
+                  detail: 'Já existe um veículo cadastrado com essa placa. (and 1 more error)'
+                  instance: /api/vehicles
+                  errors:
+                    placa:
+                      - 'Já existe um veículo cadastrado com essa placa.'
+                    chassi:
+                      - 'Já existe um veículo cadastrado com esse chassi.'
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Unprocessable Content'
+                  status:
+                    type: integer
+                    example: 422
+                  detail:
+                    type: string
+                    example: 'Já existe um veículo cadastrado com essa placa. (and 1 more error)'
+                  instance:
+                    type: string
+                    example: /api/vehicles
+                  errors:
+                    type: object
+                    properties:
+                      placa:
+                        type: array
+                        example:
+                          - 'Já existe um veículo cadastrado com essa placa.'
+                        items:
+                          type: string
+                      chassi:
+                        type: array
+                        example:
+                          - 'Já existe um veículo cadastrado com esse chassi.'
+                        items:
+                          type: string
+      tags:
+        - Vehicles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placa:
+                  type: string
+                  description: 'Placa única (formato Mercosul ou tradicional).'
+                  example: ABC1D23
+                chassi:
+                  type: string
+                  description: 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).'
+                  example: 9BWZZZ377VT004251
+                marca:
+                  type: string
+                  description: 'Marca do veículo.'
+                  example: Toyota
+                modelo:
+                  type: string
+                  description: 'Modelo do veículo.'
+                  example: Corolla
+                versao:
+                  type: string
+                  description: 'Versão/trim do veículo.'
+                  example: 'XEi 2.0'
+                valor_venda:
+                  type: number
+                  description: 'Valor de venda em reais, mínimo 0.01.'
+                  example: 129900.0
+                cor:
+                  type: string
+                  description: 'Cor do veículo.'
+                  example: Prata
+                km:
+                  type: integer
+                  description: 'Quilometragem, inteiro não negativo.'
+                  example: 15000
+                cambio:
+                  type: string
+                  description: 'Tipo de câmbio.'
+                  example: manual
+                  enum:
+                    - manual
+                    - automatico
+                combustivel:
+                  type: string
+                  description: 'Tipo de combustível.'
+                  example: flex
+                  enum:
+                    - gasolina
+                    - alcool
+                    - flex
+                    - diesel
+                    - hibrido
+                    - eletrico
+              required:
+                - placa
+                - chassi
+                - marca
+                - modelo
+                - versao
+                - valor_venda
+                - cor
+                - km
+                - cambio
+                - combustivel
+  '/api/vehicles/{vehicle_id}':
+    get:
+      summary: 'Exibir um único veículo'
+      operationId: exibirUmnicoVeculo
+      description: "`VehiclePolicy::view` hoje permite qualquer usuário autenticado independentemente da\nposse, então esta chamada sempre passa trivialmente — já está conectada agora para que\numa issue futura que restrinja a policy não precise tocar neste controller."
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 76
+                    placa: NGZ0A03
+                    chassi: MIYVDLJNIKH000003
+                    marca: Chevrolet
+                    modelo: Kicks
+                    versao: '1.6 Turbo'
+                    valor_venda: '152854.40'
+                    cor: fuchsia
+                    km: 208376
+                    cambio: manual
+                    combustivel: gasolina
+                    user_id: 132
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
+                    creator: null
+                    updater: null
+                    images:
+                      -
+                        id: 56
+                        path: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
+                        url: 'http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg'
+                        is_cover: false
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 76
+                      placa:
+                        type: string
+                        example: NGZ0A03
+                      chassi:
+                        type: string
+                        example: MIYVDLJNIKH000003
+                      marca:
+                        type: string
+                        example: Chevrolet
+                      modelo:
+                        type: string
+                        example: Kicks
+                      versao:
+                        type: string
+                        example: '1.6 Turbo'
+                      valor_venda:
+                        type: string
+                        example: '152854.40'
+                      cor:
+                        type: string
+                        example: fuchsia
+                      km:
+                        type: integer
+                        example: 208376
+                      cambio:
+                        type: string
+                        example: manual
+                      combustivel:
+                        type: string
+                        example: gasolina
+                      user_id:
+                        type: integer
+                        example: 132
+                      created_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      creator:
+                        type: string
+                        example: null
+                        nullable: true
+                      updater:
+                        type: string
+                        example: null
+                        nullable: true
+                      images:
+                        type: array
+                        example:
+                          - id: 56
+                            path: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
+                            url: 'http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg'
+                            is_cover: false
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 56
+                            path:
+                              type: string
+                              example: vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg
+                            url:
+                              type: string
+                              example: 'http://localhost:8000/storage/vehicles/763/e660ec64-aeea-3ded-bfe4-fb1f468259dc.jpg'
+                            is_cover:
+                              type: boolean
+                              example: false
+                            created_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Unauthorized
+                  status: 401
+                  detail: Unauthenticated.
+                  instance: /api/vehicles/1
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Unauthorized
+                  status:
+                    type: integer
+                    example: 401
+                  detail:
+                    type: string
+                    example: Unauthenticated.
+                  instance:
+                    type: string
+                    example: /api/vehicles/1
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/999
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/999
+      tags:
+        - Vehicles
+    put:
+      summary: 'Atualizar um veículo'
+      operationId: atualizarUmVeculo
+      description: "`PUT` e `PATCH` chegam ambos aqui e se comportam de forma idêntica: todo campo em\n`UpdateVehicleRequest` é `sometimes`, então um campo ausente simplesmente permanece\nintocado pelo `fill()` em vez de ser zerado — não há distinção de \"PUT substitui tudo\".\n`updated_by` não é setado pelo controller — `VehicleObserver` o carimba a partir do\nusuário autenticado no evento `updating`."
+      parameters: []
+      responses:
+        200:
+          description: 'Veículo atualizado. Campos ausentes no payload permanecem inalterados (PUT e PATCH se comportam de forma idêntica).'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 77
+                    placa: GZM0A04
+                    chassi: IYVDLJNIKHW000004
+                    marca: Ford
+                    modelo: Cronos
+                    versao: Comfortline
+                    valor_venda: '54132.38'
+                    cor: navy
+                    km: 237248
+                    cambio: manual
+                    combustivel: gasolina
+                    user_id: 135
+                    created_at: '2026-08-07T01:44:53.000000Z'
+                    updated_at: '2026-08-07T01:44:53.000000Z'
+                    creator: null
+                    updater: null
+                    images:
+                      -
+                        id: 57
+                        path: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
+                        url: 'http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg'
+                        is_cover: false
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 77
+                      placa:
+                        type: string
+                        example: GZM0A04
+                      chassi:
+                        type: string
+                        example: IYVDLJNIKHW000004
+                      marca:
+                        type: string
+                        example: Ford
+                      modelo:
+                        type: string
+                        example: Cronos
+                      versao:
+                        type: string
+                        example: Comfortline
+                      valor_venda:
+                        type: string
+                        example: '54132.38'
+                      cor:
+                        type: string
+                        example: navy
+                      km:
+                        type: integer
+                        example: 237248
+                      cambio:
+                        type: string
+                        example: manual
+                      combustivel:
+                        type: string
+                        example: gasolina
+                      user_id:
+                        type: integer
+                        example: 135
+                      created_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-08-07T01:44:53.000000Z'
+                      creator:
+                        type: string
+                        example: null
+                        nullable: true
+                      updater:
+                        type: string
+                        example: null
+                        nullable: true
+                      images:
+                        type: array
+                        example:
+                          - id: 57
+                            path: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
+                            url: 'http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg'
+                            is_cover: false
+                            created_at: '2026-08-07T01:44:53.000000Z'
+                            updated_at: '2026-08-07T01:44:53.000000Z'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 57
+                            path:
+                              type: string
+                              example: vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg
+                            url:
+                              type: string
+                              example: 'http://localhost:8000/storage/vehicles/945/f0b41b1f-4d8e-3b0d-b54e-b367d8431199.jpg'
+                            is_cover:
+                              type: boolean
+                              example: false
+                            created_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+                            updated_at:
+                              type: string
+                              example: '2026-08-07T01:44:53.000000Z'
+        403:
+          description: 'Usuário autenticado não é o dono do veículo nem `is_admin`.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Forbidden
+                  status: 403
+                  detail: 'This action is unauthorized.'
+                  instance: /api/vehicles/1
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Forbidden
+                  status:
+                    type: integer
+                    example: 403
+                  detail:
+                    type: string
+                    example: 'This action is unauthorized.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/999
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/999
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Unprocessable Content'
+                  status: 422
+                  detail: 'The placa has already been taken.'
+                  instance: /api/vehicles/1
+                  errors:
+                    placa:
+                      - 'Já existe um veículo cadastrado com essa placa.'
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Unprocessable Content'
+                  status:
+                    type: integer
+                    example: 422
+                  detail:
+                    type: string
+                    example: 'The placa has already been taken.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1
+                  errors:
+                    type: object
+                    properties:
+                      placa:
+                        type: array
+                        example:
+                          - 'Já existe um veículo cadastrado com essa placa.'
+                        items:
+                          type: string
+      tags:
+        - Vehicles
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placa:
+                  type: string
+                  description: 'Placa única (formato Mercosul ou tradicional).'
+                  example: ABC1D23
+                chassi:
+                  type: string
+                  description: 'Chassi único, exatamente 17 caracteres alfanuméricos (VIN).'
+                  example: 9BWZZZ377VT004251
+                marca:
+                  type: string
+                  description: 'Marca do veículo.'
+                  example: Toyota
+                modelo:
+                  type: string
+                  description: 'Modelo do veículo.'
+                  example: Corolla
+                versao:
+                  type: string
+                  description: 'Versão/trim do veículo.'
+                  example: 'XEi 2.0'
+                valor_venda:
+                  type: number
+                  description: 'Valor de venda em reais, mínimo 0.01.'
+                  example: 134900.0
+                cor:
+                  type: string
+                  description: 'Cor do veículo.'
+                  example: Preto
+                km:
+                  type: integer
+                  description: 'Quilometragem, inteiro não negativo.'
+                  example: 18000
+                cambio:
+                  type: string
+                  description: 'Tipo de câmbio.'
+                  example: automatico
+                  enum:
+                    - manual
+                    - automatico
+                combustivel:
+                  type: string
+                  description: 'Tipo de combustível.'
+                  example: flex
+                  enum:
+                    - gasolina
+                    - alcool
+                    - flex
+                    - diesel
+                    - hibrido
+                    - eletrico
+    delete:
+      summary: 'Excluir um veículo'
+      operationId: excluirUmVeculo
+      description: "`vehicle_images.vehicle_id` é `cascadeOnDelete()` a nível de PostgreSQL puro, então as\nlinhas de `VehicleImage` somem automaticamente junto com o veículo — mas esse cascade\nnunca dispara um evento Eloquent, então `VehicleImageService::deleteAllForVehicle()` é\nchamado, dentro da mesma transação, para também limpar os arquivos físicos do disco\npúblico (adiado até depois do commit, para um rollback nunca deixar o veículo\nremovido mas seus arquivos de imagem ainda no disco, ou vice-versa)."
+      parameters: []
+      responses:
+        204:
+          description: 'Veículo (e suas imagens, no banco e no storage) excluído com sucesso.'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''
+        403:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Forbidden
+                  status: 403
+                  detail: 'This action is unauthorized.'
+                  instance: /api/vehicles/1
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Forbidden
+                  status:
+                    type: integer
+                    example: 403
+                  detail:
+                    type: string
+                    example: 'This action is unauthorized.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/999
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/999
+      tags:
+        - Vehicles
+    parameters:
+      -
+        in: path
+        name: vehicle_id
+        description: 'Id do veículo.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/vehicles/{vehicle_id}/images':
+    post:
+      summary: 'Enviar uma ou mais imagens para um veículo'
+      operationId: enviarUmaOuMaisImagensParaUmVeculo
+      description: "`VehiclePolicy::manageImages` restringe isto do mesmo jeito que `update`/`delete` já\nrestringem suas próprias ações: só o dono do veículo ou um usuário `is_admin` pode\nadicionar imagens a ele."
+      parameters: []
+      responses:
+        201:
+          description: 'Imagens criadas. A primeira imagem já enviada para um veículo é automaticamente marcada como `is_cover`.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    -
+                      id: 58
+                      path: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
+                      url: 'http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg'
+                      is_cover: false
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
+                    -
+                      id: 59
+                      path: vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg
+                      url: 'http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg'
+                      is_cover: false
+                      created_at: '2026-08-07T01:44:53.000000Z'
+                      updated_at: '2026-08-07T01:44:53.000000Z'
+                properties:
+                  data:
+                    type: array
+                    example:
+                      - id: 58
+                        path: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
+                        url: 'http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg'
+                        is_cover: false
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                      - id: 59
+                        path: vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg
+                        url: 'http://localhost:8000/storage/vehicles/247/d98239dc-1582-3bf2-b93a-df3a18e121d1.jpg'
+                        is_cover: false
+                        created_at: '2026-08-07T01:44:53.000000Z'
+                        updated_at: '2026-08-07T01:44:53.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 58
+                        path:
+                          type: string
+                          example: vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg
+                        url:
+                          type: string
+                          example: 'http://localhost:8000/storage/vehicles/169/a4855dc5-0acb-33c3-b921-f4291f719ca0.jpg'
+                        is_cover:
+                          type: boolean
+                          example: false
+                        created_at:
+                          type: string
+                          example: '2026-08-07T01:44:53.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-08-07T01:44:53.000000Z'
+        403:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Forbidden
+                  status: 403
+                  detail: 'This action is unauthorized.'
+                  instance: /api/vehicles/1/images
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Forbidden
+                  status:
+                    type: integer
+                    example: 403
+                  detail:
+                    type: string
+                    example: 'This action is unauthorized.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/999/images
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/999/images
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Unprocessable Content'
+                  status: 422
+                  detail: 'Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.'
+                  instance: /api/vehicles/1/images
+                  errors:
+                    files.0:
+                      - 'Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.'
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Unprocessable Content'
+                  status:
+                    type: integer
+                    example: 422
+                  detail:
+                    type: string
+                    example: 'Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images
+                  errors:
+                    type: object
+                    properties:
+                      files.0:
+                        type: array
+                        example:
+                          - 'Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.'
+                        items:
+                          type: string
+      tags:
+        - Images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  description: 'Um ou mais arquivos de imagem (jpeg, jpg, png, gif ou webp; até 2MB cada). Enviado como multipart/form-data.'
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - files
+    parameters:
+      -
+        in: path
+        name: vehicle_id
+        description: 'Id do veículo.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/vehicles/{vehicle_id}/images/{imageId}/cover':
+    patch:
+      summary: 'Definir a capa de um veículo'
+      operationId: definirACapaDeUmVeculo
+      description: "`{imageId}` é resolvido manualmente (query com escopo por `vehicle_id` + `findOrFail`)\nem vez de nested route-model binding implícito: o binding aninhado precisaria que\n`{vehicle}` e `{image}` estivessem relacionados por um relationship Eloquent nomeado\nbatendo com o segmento da rota, enquanto aqui o que interessa de verdade é justamente\nchecar que a imagem pertence a este veículo (uma imagem de outro veículo deve retornar\n404, não 403), então isso fica explícito. `findOrFail` lança `ModelNotFoundException`,\nque o exception handler em `bootstrap/app.php` já reescreve como 404\n`application/problem+json` — nada extra é necessário aqui, seja pra \"veículo errado\"\nou \"imagem inexistente\"."
+      parameters: []
+      responses:
+        200:
+          description: 'Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste veículo deixa de sê-lo, de forma transacional.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  data:
+                    id: 60
+                    path: vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg
+                    url: 'http://localhost:8000/storage/vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg'
+                    is_cover: false
+                    created_at: '2026-08-07T01:44:54.000000Z'
+                    updated_at: '2026-08-07T01:44:54.000000Z'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 60
+                      path:
+                        type: string
+                        example: vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg
+                      url:
+                        type: string
+                        example: 'http://localhost:8000/storage/vehicles/760/6b72fe4a-5b40-307c-bc24-f79acf9a1bb9.jpg'
+                      is_cover:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        example: '2026-08-07T01:44:54.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-08-07T01:44:54.000000Z'
+        403:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Forbidden
+                  status: 403
+                  detail: 'This action is unauthorized.'
+                  instance: /api/vehicles/1/images/1/cover
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Forbidden
+                  status:
+                    type: integer
+                    example: 403
+                  detail:
+                    type: string
+                    example: 'This action is unauthorized.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images/1/cover
+        404:
+          description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/1/images/999/cover
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images/999/cover
+      tags:
+        - Images
+    parameters:
+      -
+        in: path
+        name: vehicle_id
+        description: 'Id do veículo.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: imageId
+        description: 'Id da imagem (deve pertencer ao veículo informado).'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/vehicles/{vehicle_id}/images/{imageId}':
+    delete:
+      summary: 'Excluir uma imagem de um veículo'
+      operationId: excluirUmaImagemDeUmVeculo
+      description: "A imagem é buscada através de `$vehicle->images()` em vez de um `VehicleImage::findOrFail()`\nglobal (ou binding implícito de rota em `{imageId}`): isso garante que uma imagem\npertencente a outro veículo retorne 404 exatamente como uma que não existe, em vez de\nvazar um 403 (ou ter sucesso) para um id que é real mas não é \"deste veículo\"."
+      parameters: []
+      responses:
+        204:
+          description: 'Imagem excluída do banco e o arquivo físico removido do storage.'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''
+        403:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: Forbidden
+                  status: 403
+                  detail: 'This action is unauthorized.'
+                  instance: /api/vehicles/1/images/1
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: Forbidden
+                  status:
+                    type: integer
+                    example: 403
+                  detail:
+                    type: string
+                    example: 'This action is unauthorized.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images/1
+        404:
+          description: 'Também retornado quando a imagem existe mas pertence a outro veículo.'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  type: 'about:blank'
+                  title: 'Not Found'
+                  status: 404
+                  detail: 'O recurso solicitado não foi encontrado.'
+                  instance: /api/vehicles/1/images/999
+                properties:
+                  type:
+                    type: string
+                    example: 'about:blank'
+                  title:
+                    type: string
+                    example: 'Not Found'
+                  status:
+                    type: integer
+                    example: 404
+                  detail:
+                    type: string
+                    example: 'O recurso solicitado não foi encontrado.'
+                  instance:
+                    type: string
+                    example: /api/vehicles/1/images/999
+      tags:
+        - Images
+    parameters:
+      -
+        in: path
+        name: vehicle_id
+        description: 'Id do veículo.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: imageId
+        description: 'Id da imagem (deve pertencer ao veículo informado).'
+        example: 1
+        required: true
+        schema:
+          type: integer

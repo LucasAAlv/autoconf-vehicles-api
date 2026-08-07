@@ -78,7 +78,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            return Problem::response($request, 404, 'The requested resource was not found.');
+            return Problem::response($request, 404, 'O recurso solicitado não foi encontrado.');
         });
 
         // Catches everything else that carries a real HTTP status and

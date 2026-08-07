@@ -23,8 +23,10 @@ class VehicleResource extends JsonResource
      * hash can leak through this resource. Either relation is `null` when
      * unset (a vehicle created before an observer stamped it, for example).
      *
-     * `images` is a placeholder: `VehicleImage` does not exist yet (M4), so
-     * this always reports an empty array until that model lands.
+     * `images` is only present in the response when the `images` relation
+     * was eager-loaded by the caller (`whenLoaded`) — controllers that
+     * don't need it (e.g. `store()`, right after creating a vehicle with
+     * no images yet) skip the extra query entirely.
      *
      * @return array<string, mixed>
      */
@@ -53,7 +55,7 @@ class VehicleResource extends JsonResource
                 'id'   => $this->updater->id,
                 'name' => $this->updater->name,
             ] : null),
-            'images' => [],
+            'images' => VehicleImageResource::collection($this->whenLoaded('images')),
         ];
     }
 }
