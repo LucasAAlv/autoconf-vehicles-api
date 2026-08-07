@@ -9,7 +9,18 @@ use App\Models\VehicleImage;
 use App\Services\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Knuckles\Scribe\Attributes\Authenticated;
+use Knuckles\Scribe\Attributes\BodyParam;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\Response as ResponseExample;
+use Knuckles\Scribe\Attributes\ResponseFromApiResource;
+use Knuckles\Scribe\Attributes\UrlParam;
 
+#[Group(
+    name: 'Images',
+    description: 'Upload e gestão de imagens de um veículo, incluindo a capa única (`is_cover`). Assim como `update`/`delete` de veículos, apenas o dono do veículo ou um usuário `is_admin` pode gerenciar suas imagens.',
+)]
+#[Authenticated]
 class VehicleImageController extends Controller
 {
     public function __construct(private readonly VehicleImageService $vehicleImageService)
@@ -23,6 +34,39 @@ class VehicleImageController extends Controller
      * already gate their own actions: only the vehicle's owner or an
      * `is_admin` user may add images to it.
      */
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[BodyParam('files', 'file[]', 'Um ou mais arquivos de imagem (jpeg, jpg, png, gif ou webp; até 2MB cada). Enviado como multipart/form-data.', required: true)]
+    #[ResponseFromApiResource(
+        VehicleImageResource::class,
+        model: VehicleImage::class,
+        status: 201,
+        collection: true,
+        description: 'Imagens criadas. A primeira imagem já enviada para um veículo é automaticamente marcada como `is_cover`.',
+    )]
+    #[ResponseExample(status: 422, content: [
+        'type' => 'about:blank',
+        'title' => 'Unprocessable Content',
+        'status' => 422,
+        'detail' => 'Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.',
+        'instance' => '/api/vehicles/1/images',
+        'errors' => [
+            'files.0' => ['Cada imagem deve ser de um dos seguintes tipos: jpeg, jpg, png, gif ou webp.'],
+        ],
+    ])]
+    #[ResponseExample(status: 403, content: [
+        'type' => 'about:blank',
+        'title' => 'Forbidden',
+        'status' => 403,
+        'detail' => 'This action is unauthorized.',
+        'instance' => '/api/vehicles/1/images',
+    ])]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/999/images',
+    ])]
     public function store(StoreVehicleImageRequest $request, Vehicle $vehicle): JsonResponse
     {
         $this->authorize('manageImages', $vehicle);
@@ -49,6 +93,27 @@ class VehicleImageController extends Controller
      * `application/problem+json` response — nothing extra to do here for
      * either "wrong vehicle" or "no such image".
      */
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[UrlParam('imageId', 'integer', 'Id da imagem (deve pertencer ao veículo informado).', example: 1)]
+    #[ResponseFromApiResource(
+        VehicleImageResource::class,
+        model: VehicleImage::class,
+        description: 'Imagem promovida a capa. Qualquer imagem anteriormente marcada como capa deste veículo deixa de sê-lo, de forma transacional.',
+    )]
+    #[ResponseExample(status: 403, content: [
+        'type' => 'about:blank',
+        'title' => 'Forbidden',
+        'status' => 403,
+        'detail' => 'This action is unauthorized.',
+        'instance' => '/api/vehicles/1/images/1/cover',
+    ])]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/1/images/999/cover',
+    ], description: 'Também retornado quando a imagem existe mas pertence a outro veículo.')]
     public function setCover(Vehicle $vehicle, int $imageId): VehicleImageResource
     {
         $this->authorize('manageImages', $vehicle);
@@ -72,6 +137,23 @@ class VehicleImageController extends Controller
      * leaking a 403 (or succeeding) for an id that is real but not "this
      * vehicle's".
      */
+    #[UrlParam('vehicle_id', 'integer', 'Id do veículo.', example: 1)]
+    #[UrlParam('imageId', 'integer', 'Id da imagem (deve pertencer ao veículo informado).', example: 1)]
+    #[ResponseExample(status: 204, content: '', description: 'Imagem excluída do banco e o arquivo físico removido do storage.')]
+    #[ResponseExample(status: 403, content: [
+        'type' => 'about:blank',
+        'title' => 'Forbidden',
+        'status' => 403,
+        'detail' => 'This action is unauthorized.',
+        'instance' => '/api/vehicles/1/images/1',
+    ])]
+    #[ResponseExample(status: 404, content: [
+        'type' => 'about:blank',
+        'title' => 'Not Found',
+        'status' => 404,
+        'detail' => 'The requested resource was not found.',
+        'instance' => '/api/vehicles/1/images/999',
+    ], description: 'Também retornado quando a imagem existe mas pertence a outro veículo.')]
     public function destroy(Vehicle $vehicle, string $imageId): Response
     {
         $this->authorize('manageImages', $vehicle);
