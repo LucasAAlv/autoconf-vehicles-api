@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Http\Requests\Auth\Concerns\HasAuthValidationMessages;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
+    use HasAuthValidationMessages;
+
     /**
      * Anyone may register a new account; there is no prior authentication or
      * ownership check to perform here.
