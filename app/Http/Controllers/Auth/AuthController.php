@@ -81,7 +81,7 @@ class AuthController extends Controller
     {
         $user = User::create($request->accountData());
 
-        return response()->json($user, 201);
+        return response()->json($this->withIsAdmin($user), 201);
     }
 
     /**
@@ -138,7 +138,7 @@ class AuthController extends Controller
         // now that it carries an authenticated identity.
         $request->session()->regenerate();
 
-        return response()->json(Auth::user());
+        return response()->json($this->withIsAdmin(Auth::user()));
     }
 
     /**
@@ -175,7 +175,21 @@ class AuthController extends Controller
     ], description: 'Nenhuma sessão válida (cookie ausente/expirado, ou `X-XSRF-TOKEN` ausente/incorreto).')]
     public function me(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        return response()->json($this->withIsAdmin($request->user()));
+    }
+
+    /**
+     * `is_admin` is deliberately in `User::$hidden` — it must never leak
+     * through a generic user serialization (e.g. `creator`/`updater` on a
+     * `Vehicle`). These three endpoints are the one exception: they always
+     * describe the authenticated user to themselves, and the front-end
+     * needs `is_admin` to decide whether to show owner/admin-only actions
+     * (the server-side `VehiclePolicy` remains the actual authorization
+     * boundary regardless of what the client does with this flag).
+     */
+    private function withIsAdmin(User $user): array
+    {
+        return [...$user->toArray(), 'is_admin' => $user->is_admin];
     }
 
     /**
