@@ -189,7 +189,7 @@ class AuthController extends Controller
      */
     private function withIsAdmin(User $user): array
     {
-        return [...$user->toArray(), 'is_admin' => $user->is_admin];
+        return $user->makeVisible('is_admin')->toArray();
     }
 
     /**
